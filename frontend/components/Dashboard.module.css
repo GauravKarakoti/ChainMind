@@ -1,0 +1,26 @@
+.dashboardGrid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    width: 100%;
+    margin-top: 2rem;
+}
+  
+.chartCard {
+    background: rgb(157, 234, 157);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+  
+.chartCard h2 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.25rem;
+}
+  
+.chartContainer {
+    position: relative;
+    height: 400px; /* Fixed height for all charts */
+    width: 100%;
+}
