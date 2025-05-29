@@ -14,9 +14,9 @@ app.use('/api/logger', loggerRouter);
 
 // Start webhook server
 webhookServer.listen(3001, () => {
-  console.log('Webhook server running on port 3001');
+  console.log('Webhook server running');
 });
 
 app.listen(3000, () => {
-  console.log('API server running on http://localhost:3000');
+  console.log('API server running');
 });

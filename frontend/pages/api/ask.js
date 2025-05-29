@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     
     // Call Nodit API through our backend
     const noditResponse = await axios.post(
-      'http://localhost:3000/api/nodit/nodit-api',
+      'https://chainmind-backend.onrender.com/api/nodit/nodit-api',
       { accountAddress: address }
     );
     
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     result.transfers = transfers;
     
     // Log via backend API
-    await axios.post('http://localhost:3000/api/logger/log-query', {
+    await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
       query,
       response: result,
       userIp,
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     console.error('API Error:', err);
 
     // Log error via backend API
-    await axios.post('http://localhost:3000/api/logger/log-query', {
+    await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
       query,
       response: null,
       userIp,
