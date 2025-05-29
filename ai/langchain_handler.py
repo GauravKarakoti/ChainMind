@@ -1,24 +1,41 @@
 from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAI
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
 llm = OpenAI(
-    openai_api_key=os.getenv("OPENAI_API_KEY"),  # Explicit parameter name
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
     temperature=0.7,
     model_name="gpt-3.5-turbo"
 )
 
 template = """
-You are a blockchain data assistant. Map the user's query to a Nodit API call.
+You are a blockchain data assistant using Nodit's APIs. Map the user's query to the appropriate Nodit API call.
+
+Available APIs:
+- getTokenTransfersByAccount (requires accountAddress)
+- getTopTokenHolders (requires tokenAddress)
+- getPriceHistory (requires tokenSymbol)
+- getAccountBalance (requires address)
+- getTokenMetadata (requires contractAddress)
+
+Output JSON with:
+1. "api": API method name
+2. "params": Parameters object
+3. "chain": Blockchain network (default: "ethereum/mainnet")
 
 Query: {query}
+
 Examples:
-- "portfolio performance" → getTokenTransfersByAccount + CoinGecko price API
-- "whales" → getTopTokenHolders
-- "price history" → getPriceHistory
+- "portfolio performance" → 
+  {{"api": "getTokenTransfersByAccount", "params": {{"accountAddress": "0x..."}}}}
+- "whales holding UNI" → 
+  {{"api": "getTopTokenHolders", "params": {{"tokenAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"}}}}
+- "ETH price history" → 
+  {{"api": "getPriceHistory", "params": {{"token": "ethereum"}}}}
 """
 
 prompt = PromptTemplate(
@@ -27,25 +44,16 @@ prompt = PromptTemplate(
     validate_template=True
 )
 
-def parse_query(query: str) -> str | None:
+def parse_query(query: str) -> dict:
     try:
         result = (prompt | llm).invoke({"query": query})
-        response_text = result.get("text", "")
-        return response_text.strip()
+        response_text = result.strip()
+        
+        # Clean JSON output
+        if response_text.startswith("```json"):
+            response_text = response_text[7:-3].strip()
+        
+        return json.loads(response_text)
     except Exception as e:
         print(f"LLM Error: {e}")
-        return None
-
-def resolve_ambiguous_query(query):
-    if "vitalik" in query.lower():
-        return {
-            "api": "getAccountBalance",
-            "params": { 
-                "address": "0xeB4F0Cb1644FA1f6dd01Aa2F7c49099d2267F3A8",
-                "chain": "ethereum"
-            }
-        }
-    return {"error": "Could not resolve query"}
-
-parse_query("Hello")
-resolve_ambiguous_query("Hello")
+        return {"error": "Could not parse query"}

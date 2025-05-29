@@ -2,10 +2,11 @@ require('dotenv').config();
 import axios from 'axios';
 
 export default async function handler(req, res) {
+  const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  console.log('REQ.BODY:', req.body);
+  const { query } = req.body;
+
   try {
-    console.log('REQ.BODY:', req.body);
-    const { query } = req.body;
-    
     // Validate input
     if (!query || typeof query !== 'string') {
       return res.status(400).json({ error: 'Missing or invalid "query" field' });
@@ -17,20 +18,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No valid Ethereum address found in query' });
     }
     const address = matches[0];
-
-    // Fetch token transfers
-    const transfersResponse = await axios.post(
-      'https://web3.nodit.io/v1/ethereum/mainnet/token/getTokenTransfersByAccount',
-      {
-        accountAddress: address,
-        fromDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        toDate: new Date().toISOString()
-      },
-      { headers: { 'X-API-KEY': process.env.NODIT_API_KEY } }
+    
+    // Call Nodit API through our backend
+    const noditResponse = await axios.post(
+      'http://localhost:3000/api/nodit/nodit-api',
+      { accountAddress: address }
     );
+    
+    // Format response for frontend
+    let result = { data: noditResponse.data };
+    
+    // Add additional processing 
+    result.summary = {
+      totalTokens: [...new Set(noditResponse.data.items.map(t => t.token))].length,
+      totalValueUSD: noditResponse.data.items.reduce((sum, t) => sum + (t.valueUSD || 0), 0)
+    };
 
-    // Process transfers
-    const transferItems = transfersResponse.data.items || []; // fall back to empty array if undefined
+    const transferItems = noditResponse.data.items || []; // fall back to empty array if undefined
     console.log(transferItems)
     const transfers = transferItems.map(t => ({
       token: t.contract.symbol,
@@ -39,16 +43,28 @@ export default async function handler(req, res) {
     }));
     console.log(transfers)
 
-    return res.status(200).json({
-      address,
-      transfers,
-      summary: {
-        totalTokens: [...new Set(transfers.map(t => t.token))].length,
-      }
+    result.transfers = transfers;
+    
+    // Log via backend API
+    await axios.post('http://localhost:3000/api/logger/log-query', {
+      query,
+      response: result,
+      userIp,
+      error: null
     });
 
+    return res.status(200).json(result);
   } catch (err) {
     console.error('API Error:', err);
+
+    // Log error via backend API
+    await axios.post('http://localhost:3000/api/logger/log-query', {
+      query,
+      response: null,
+      userIp,
+      error: err.message
+    }).catch(logErr => console.error('Logging failed:', logErr));
+
     return res.status(500).json({ 
       error: 'Blockchain analysis failed',
       details: err.response?.data?.error || err.message

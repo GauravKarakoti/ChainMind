@@ -1,5 +1,5 @@
 import { Pie } from 'react-chartjs-2';
-import { processPieData } from '../lib/chartData';
+import { processPieData} from '../lib/chartData';
 import { Chart as ChartJS, ArcElement, BarElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend } from 'chart.js';
 
 // Register required Chart.js components
@@ -17,7 +17,7 @@ ChartJS.register(
 // CSS for chart containers 
 import styles from './Dashboard.module.css';
 
-export default function Dashboard({ transfers}) {
+export default function Dashboard({ transfers }) {
   const tokenDistribution = processPieData(transfers);
   console.log(tokenDistribution);
 
