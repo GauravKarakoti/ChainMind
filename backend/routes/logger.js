@@ -9,6 +9,7 @@ router.post('/log-query', async (req, res) => {
     res.json({ success: true, logId });
   } catch (err) {
     res.status(500).json({ error: 'Logging failed' });
+    console.error('Logging Error:', err);
   }
 });
 

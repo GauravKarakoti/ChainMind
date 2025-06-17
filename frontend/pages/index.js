@@ -86,9 +86,20 @@ export default function Home() {
       console.log(res.data);
     } catch (err) {
       setError('Failed to get response. Please try again.');
+      console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderChainInfo = () => {
+    if (!response) return null;
+    
+    return (
+      <div className="chain-badge">
+        {response.chain.split('/')[0].toUpperCase()}
+      </div>
+    );
   };
 
   return (
@@ -110,9 +121,12 @@ export default function Home() {
       {loading && <Loading>Analyzing blockchain data...</Loading>}
 
       {response && (
-        <Dashboard
-          transfers={response.transfers}
-        />
+        <>
+          {renderChainInfo()}
+          <Dashboard
+            data={response}
+          />
+        </>
       )}
     </Container>
   );

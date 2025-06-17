@@ -1,4 +1,4 @@
-const { parse_query } = require('../../ai/langchain_handler.py'); // Via Python bridge
+const { parse_query } = require('../ai/langchainHandler');
 
 // Handle ambiguous queries using LangChain
 async function resolveAmbiguousQuery(params) {

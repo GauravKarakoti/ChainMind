@@ -1,0 +1,57 @@
+[
+  {
+    "api": "getTokenTransfersByAccount",
+    "params": {
+      "accountAddress": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+    },
+    "chain": "ethereum/mainnet"
+  },
+  {
+    "api": "getTokenPricesByContracts",
+    "params": {
+      "contractAddresses": "0xA0b86991c6218b36c1d19d4a2e9Eb0cE3606eB48"
+    },
+    "chain": "ethereum/mainnet"
+  },
+  {
+    "api": "getDailyTransactionsStats",
+    "params": {},
+    "chain": "ethereum/mainnet"
+  },
+  {
+    "api": "getNftMetadataByTokenIds",
+    "params": {
+      "contractAddress": "0xBC4CA0eda7647A8aB7C2061c2E118A18a936f13D",
+      "tokenId": "1"
+    },
+    "chain": "ethereum/mainnet"
+  },
+  {
+    "api": "getTransactionsByAccount",
+    "params": {
+      "accountAddress": "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb"
+    },
+    "chain": "tron/mainnet"
+  },
+  {
+    "api": "getTransactionsByAccount",
+    "params": {
+      "accountAddress": "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"
+    },
+    "chain": "xrpl/mainnet"
+  },
+  {
+    "api": "getTransactionsByAccount",
+    "params": {
+      "accountAddress": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    },
+    "chain": "bitcoin/mainnet"
+  },
+  {
+    "api": "getTransactionsByAccount",
+    "params": {
+      "accountAddress": "DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L"
+    },
+    "chain": "dogecoin/mainnet"
+  }
+]

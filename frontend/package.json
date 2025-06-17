@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.828.0",
     "axios": "^1.9.0",
     "chart.js": "^4.4.9",
     "dotenv": "^16.5.0",

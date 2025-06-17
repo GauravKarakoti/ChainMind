@@ -23,3 +23,65 @@
     height: 400px; /* Fixed height for all charts */
     width: 100%;
 }
+
+.chainBadge {
+    padding: 0.25rem 0.5rem;
+    background-color: #6366f1;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.chartTitle {
+    margin-bottom: 1rem;
+    color: #1f2937;
+    font-size: 1.5rem;
+    text-align: center;
+}
+  
+.nftCard {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+  
+.nftLine {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    color: #374151;
+}
+  
+.nftContract {
+    color: #4f46e5;
+    font-weight: 500;
+}
+  
+.nftLink {
+    color: #3b82f6;
+    text-decoration: none;
+}
+.nftLink:hover {
+    text-decoration: underline;
+}
+  
+.nftAttributesTitle {
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+  
+.nftAttributesList {
+    list-style: disc inside;
+    padding-left: 1rem;
+}
+  
+.nftAttributeItem {
+    margin: 0.25rem 0;
+    color: #4b5563;
+}
+  
