@@ -1,24 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); // Add CORS module
 const app = express();
 const webhookServer = require('./webhooks');
 
 const PORT = 4000;
 const WEBHOOK_PORT = 3001;
-
-// Configure CORS middleware
-const corsOptions = {
-  origin: '*', // Allow all origins (replace with your frontend URL in production)
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-KEY'], // Allowed headers
-  credentials: true, // Allow credentials
-  optionsSuccessStatus: 200 // For legacy browser support
-};
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
-app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Welcome to ChainMind API');
