@@ -3,8 +3,10 @@ const express = require('express');
 const app = express();
 const webhookServer = require('./webhooks');
 
-const PORT = 4000;
+const PORT = 3002;
 const WEBHOOK_PORT = 3001;
+
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Welcome to ChainMind API');
