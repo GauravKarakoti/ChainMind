@@ -17,11 +17,5 @@
       "dest": "server.js",
       "methods": ["GET"]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/webhooks/(.*)",
-      "destination": "server.js"
-    }
   ]
 }
