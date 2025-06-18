@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const webhookServer = require('./webhooks');
 
+const PORT = 4000;
+const WEBHOOK_PORT = 3001;
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -19,11 +22,10 @@ app.use('/api/logger', loggerRouter);
 const aiRouter = require('./routes/ai');
 app.use('/api/ai', aiRouter);
 
-// Start webhook server
-webhookServer.listen(3001, () => {
-  console.log('Webhook server running');
+app.listen(PORT, () => {
+  console.log(`API server running on port ${PORT}`);
 });
 
-app.listen(4000, () => {
-  console.log('API server running');
+webhookServer.listen(WEBHOOK_PORT, () => {
+  console.log(`Webhook server running on port ${WEBHOOK_PORT}`);
 });
