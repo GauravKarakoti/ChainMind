@@ -18,11 +18,13 @@
     "chart.js": "^4.4.9",
     "dotenv": "^16.5.0",
     "fs": "^0.0.1-security",
+    "lucide-react": "^0.517.0",
     "next": "^15.3.2",
     "path": "^0.12.7",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.0",
+    "react-tooltip": "^5.29.1",
     "sqlite3": "^5.1.7",
     "styled-components": "^6.1.18"
   }

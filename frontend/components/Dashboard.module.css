@@ -5,11 +5,28 @@
     width: 100%;
     margin-top: 2rem;
 }
-  
+
+.apiBadge {
+  padding: 0.25rem 0.75rem;
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
 .chartCard {
     padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background: white;
+    transition: transform 0.2s;
+}
+
+.chartCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
   
 .chartCard h2 {
@@ -24,13 +41,19 @@
     width: 100%;
 }
 
+.header {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .chainBadge {
-    padding: 0.25rem 0.5rem;
-    background-color: #6366f1;
-    color: white;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: bold;
+    padding: 0.25rem 0.75rem;
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
     display: inline-block;
     margin-bottom: 1rem;
 }
@@ -45,9 +68,9 @@
 .nftCard {
     padding: 1.5rem;
     margin-bottom: 1rem;
-    background: #f9fafb;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
   
 .nftLine {

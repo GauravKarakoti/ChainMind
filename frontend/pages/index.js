@@ -2,6 +2,16 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import Dashboard from '../components/Dashboard';
 import axios from 'axios';
+import { Tooltip } from 'react-tooltip';
+import { HelpCircle } from 'lucide-react';
+
+const EXAMPLE_QUERIES = [
+  "Show my token transfers on 0x...",
+  "What's the current price of ETH?",
+  "Display NFT metadata for 0x... #1234",
+  "Transaction stats for ETH",
+  "Portfolio performance on T..."
+];
 
 const Container = styled.div`
   max-width: 1200px;
@@ -31,6 +41,10 @@ const Input = styled.input`
     outline: none;
     border-color: #6366f1;
   }
+`;
+
+const ExampleDiv = styled.div`
+  margin-bottom: 1rem;
 `;
 
 const Button = styled.button`
@@ -72,6 +86,7 @@ export default function Home() {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showExamples, setShowExamples] = useState(false);
 
   const handleAsk = async () => {
     if (!query.trim()) {
@@ -92,29 +107,52 @@ export default function Home() {
     }
   };
 
-  const renderChainInfo = () => {
-    if (!response) return null;
-    
-    return (
-      <div className="chain-badge">
-        {response.chain.split('/')[0].toUpperCase()}
-      </div>
-    );
-  };
-
   return (
     <Container>
       <SearchContainer>
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask about wallet activity, token performance, or set alerts..."
+          placeholder="e.g., token transfers, NFT data, portfolio performance..."
           onKeyPress={(e) => e.key === 'Enter' && handleAsk()}
         />
+        <HelpCircle 
+          className="absolute right-3 top-3 text-gray-400 cursor-pointer"
+          size={20}
+          onClick={() => setShowExamples(!showExamples)}
+          data-tooltip-id="help-tooltip"
+        />
+        <Tooltip id="help-tooltip" place="top">
+          Show example queries
+        </Tooltip>
         <Button onClick={handleAsk} disabled={!query.trim() || loading}>
-          {loading ? 'Analyzing...' : 'Ask ChainMind'}
+          {loading ? (
+            <span className="flex items-center">
+              Analyzing...
+            </span>
+          ) : 'Ask ChainMind'}
         </Button>
       </SearchContainer>
+      
+      {showExamples && (
+        <ExampleDiv className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-medium mb-2">Try these examples:</h3>
+          <div className="flex flex-wrap gap-2 p-2">
+            {EXAMPLE_QUERIES.map((example, i) => (
+              <button
+                key={i}
+                className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-full"
+                onClick={() => {
+                  setQuery(example);
+                  handleAsk();
+                }}
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+        </ExampleDiv>
+      )}
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -122,10 +160,7 @@ export default function Home() {
 
       {response && (
         <>
-          {renderChainInfo()}
-          <Dashboard
-            data={response}
-          />
+          <Dashboard data={response} />
         </>
       )}
     </Container>

@@ -79,18 +79,31 @@ async function parse_query(query) {
     }
     console.log('Groq Response:', content);
 
-    // Clean JSON output
-    let jsonText = content.trim();
-    if (jsonText.startsWith("```json")) {
-      jsonText = jsonText.slice(7, -3).trim();
-    } else if (jsonText.startsWith("```")) {
-      jsonText = jsonText.slice(3, -3).trim();
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonText);
+    } catch (parseError) {
+      // Try to extract JSON from malformed responses
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Invalid JSON response from Groq API');
+      }
     }
 
-    return JSON.parse(jsonText);
+    // Validate required fields
+    if (!parsed.api || !parsed.chain) {
+      throw new Error('Groq response missing required fields');
+    }
+
+    return parsed;
   } catch (error) { 
     console.error('Groq API Error:', error);
-    return { error: "Could not parse query" };
+    return { 
+      error: "Could not parse query",
+      details: error.message
+    };
   }
 }
 

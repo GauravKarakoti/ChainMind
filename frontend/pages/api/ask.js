@@ -21,6 +21,13 @@ export default async function handler(req, res) {
     const { api, params, chain } = aiResponse.data;
     console.log('AI Response:', { api, params, chain });
 
+    if (aiResponse.data.error) {
+      return res.status(400).json({
+        error: 'Query parsing failed',
+        details: aiResponse.data.details || 'Could not understand your request'
+      });
+    }
+
     // Call Nodit API through our backend
     const noditResponse = await axios.post(
       // 'http://localhost:4000/api/nodit/nodit-api',
@@ -125,7 +132,7 @@ export default async function handler(req, res) {
           price: t.price
         }));
         break;
-      case 'getNFTMetadataByContracts':
+      case 'getNftMetadataByTokenIds':
         result.nftMetadata = items
         break;
       default:
@@ -145,6 +152,17 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('API Error:', err);
 
+    let userMessage = 'Blockchain analysis failed';
+    let details = err.message;
+
+    // Handle specific error cases
+    if (err.response?.status === 400) {
+      userMessage = 'Invalid request parameters';
+    } else if (err.response?.status === 429) {
+      userMessage = 'Too many requests';
+      details = 'Please wait a moment before trying again';
+    }
+
     // Log error via backend API
     // await axios.post('http://localhost:4000/api/logger/log-query', {
     await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
@@ -154,9 +172,9 @@ export default async function handler(req, res) {
       error: err.message
     }).catch(logErr => console.error('Logging failed:', logErr));
 
-    return res.status(500).json({
-      error: 'Blockchain analysis failed',
-      details: err.response?.data?.error || err.message
+    return res.status(err.response?.status || 500).json({
+      error: userMessage,
+      details
     });
   }
 }
