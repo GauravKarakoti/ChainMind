@@ -7,7 +7,7 @@ import { HelpCircle } from 'lucide-react';
 
 const EXAMPLE_QUERIES = [
   "Show my token transfers on 0x...",
-  "What's the current price of ETH?",
+  "What's the current price of AAVE?",
   "Display NFT metadata for 0x... #1234",
   "Transaction stats for ETH",
   "Portfolio performance on T..."
@@ -65,6 +65,10 @@ const Button = styled.button`
     background-color: #a5b4fc;
     cursor: not-allowed;
   }
+`;
+
+const ExampleButton = styled.button`
+  margin-right: 0.8rem;
 `;
 
 const Loading = styled.div`
@@ -139,7 +143,7 @@ export default function Home() {
           <h3 className="font-medium mb-2">Try these examples:</h3>
           <div className="flex flex-wrap gap-2 p-2">
             {EXAMPLE_QUERIES.map((example, i) => (
-              <button
+              <ExampleButton
                 key={i}
                 className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-full"
                 onClick={() => {
@@ -148,7 +152,7 @@ export default function Home() {
                 }}
               >
                 {example}
-              </button>
+              </ExampleButton>
             ))}
           </div>
         </ExampleDiv>
