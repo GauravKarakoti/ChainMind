@@ -58,6 +58,17 @@ const tokens = {
   "ZRX": "0xE41d2489571d322189246DaFA5ebDe1F4699F498"
 }
 
+async function resolveTokenAddress(tokenSymbol) {
+  const upperSymbol = tokenSymbol.toUpperCase();
+  if (tokens[upperSymbol]) return tokens[upperSymbol];
+  
+  // Try to find by partial match
+  const match = Object.entries(tokens).find(([sym]) => 
+    sym.includes(upperSymbol)
+  );
+  return match ? match[1] : null;
+}
+
 // Unified blockchain API handler
 router.post('/nodit-api', async (req, res) => {
   const { api, params, chain } = req.body;
@@ -66,8 +77,23 @@ router.post('/nodit-api', async (req, res) => {
     return res.status(400).json({ error: 'Missing API parameters' });
   }
 
+  const validateChain = (chain) => {
+    const validChains = [
+      'ethereum/mainnet', 
+      'tron/mainnet',
+      'xrpl/mainnet',
+      'bitcoin/mainnet',
+      'dogecoin/mainnet'
+    ];
+    return validChains.includes(chain);
+  };
+
+  if (!validateChain(chain)) {
+    return res.status(400).json({ error: 'Unsupported blockchain network' });
+  }
+
   try {
-    const cacheKey = `${chain}:${api}:${params}`;
+    const cacheKey = `${chain}:${api}:${JSON.stringify(params)}`;
     const cached = await getApiCache(cacheKey);
     if (cached) {
       return res.json(cached);
@@ -75,27 +101,48 @@ router.post('/nodit-api', async (req, res) => {
 
     // Chain-specific handling
     let url, body, contractAddress, headers = { 'X-API-KEY': process.env.NODIT_API_KEY };
+
+    const noditClient = axios.create({
+      baseURL: 'https://web3.nodit.io/v1/',
+      headers: { 'X-API-KEY': process.env.NODIT_API_KEY },
+      timeout: 10000
+    });
     
     switch (chain.split('/')[0]) {
       case 'ethereum':
         switch(api) {
           case 'getTokenTransfersByAccount':
-            url = 'https://web3.nodit.io/v1/ethereum/mainnet/token/getTokenTransfersByAccount';
+            url = 'ethereum/mainnet/token/getTokenTransfersByAccount';
             body = { 
               accountAddress: params.accountAddress,
               fromDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-              toDate: new Date().toISOString()
+              toDate: new Date().toISOString(),
+              page: params.page || 1,  // Add pagination
+              limit: params.limit || 20
             };
             break;
           case 'getTokenPricesByContracts':
-            url = 'https://web3.nodit.io/v1/ethereum/mainnet/token/getTokenPricesByContracts';
-            contractAddress = params.tokenName? tokens[params.tokenName.toUpperCase()] : params.contractAddress;
+            url = 'ethereum/mainnet/token/getTokenPricesByContracts';
+            const tokenSymbol = params.tokenName;
+            contractAddress = tokenSymbol 
+              ? await resolveTokenAddress(tokenSymbol)
+              : params.contractAddress;
+            if (!contractAddress) {
+              return res.status(400).json({ 
+                error: `Token "${tokenSymbol}" not found. Recheck or Provide contract address instead.` 
+              });
+            }
             body = { 
               contractAddresses: [contractAddress]
             };
             break;
           case 'getNftMetadataByTokenIds':
-            url = 'https://web3.nodit.io/v1/ethereum/mainnet/nft/getNftMetadataByTokenIds';
+            if (!params.contractAddress || !params.tokenId) {
+              return res.status(400).json({
+                error: 'Missing contractAddress or tokenId for NFT lookup'
+              });
+            }
+            url = 'ethereum/mainnet/nft/getNftMetadataByTokenIds';
             body = {
               tokens: [
                 {
@@ -106,7 +153,7 @@ router.post('/nodit-api', async (req, res) => {
             }
             break;
           case 'getDailyTransactionsStats':
-            url = 'https://web3.nodit.io/v1/ethereum/mainnet/stats/getDailyTransactionsStats';
+            url = 'ethereum/mainnet/stats/getDailyTransactionsStats';
             body = {
               startDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
               endDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
@@ -118,28 +165,28 @@ router.post('/nodit-api', async (req, res) => {
         break;
       
       case 'xrpl':
-        url = `https://web3.nodit.io/v1/xrpl/mainnet/blockchain/getTransactionsByAccount`;
+        url = `xrpl/mainnet/blockchain/getTransactionsByAccount`;
         body = {
           accountAddress: params.accountAddress,
         };
         break;
 
       case 'tron':
-        url = `https://web3.nodit.io/v1/tron/mainnet/blockchain/getTransactionsByAccount`;
+        url = `tron/mainnet/blockchain/getTransactionsByAccount`;
         body = {
           accountAddress: params.accountAddress,
         };
         break;
       
       case 'bitcoin':
-        url = `https://web3.nodit.io/v1/bitcoin/mainnet/blockchain/getTransactionsByAccount`;
+        url = `bitcoin/mainnet/blockchain/getTransactionsByAccount`;
         body = {
           accountAddress: params.accountAddress,
         };
         break;
 
       case 'dogecoin':
-        url = `https://web3.nodit.io/v1/dogecoin/mainnet/blockchain/getTransactionsByAccount`;
+        url = `dogecoin/mainnet/blockchain/getTransactionsByAccount`;
         body = {
           accountAddress: params.accountAddress,
         };
@@ -151,7 +198,7 @@ router.post('/nodit-api', async (req, res) => {
 
     console.log(url,body,{headers});
 
-    const response = await axios.post(url, body, { headers : headers });
+    const response = await noditClient.post(url, body);
     let result = response.data;
     
     // Normalize data across chains
@@ -163,10 +210,16 @@ router.post('/nodit-api', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Nodit API Error:', error.response?.data || error.message);
-    res.status(500).json({ 
+    const errorResponse = {
       error: 'Nodit API request failed',
-      details: error.response?.data?.error || error.message
-    });
+      details: error.response?.data?.error || error.message,
+      statusCode: error.response?.status || 500,
+      api,
+      params,
+      chain
+    };
+   
+    res.status(errorResponse.statusCode).json(errorResponse);
   }
 });
 

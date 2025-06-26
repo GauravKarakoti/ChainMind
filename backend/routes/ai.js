@@ -17,14 +17,14 @@ router.post('/parse-query', async (req, res) => {
     const result = await parse_query(query);
     
     // Log successful parse
-    await logQuery(query, result, userIp, null);
+    await logQuery(query, result, userIp, null, result.api, result.chain);
     
     res.json(result);
   } catch (error) {
     console.error('AI Parse Error:', error);
     
     // Log failed parse
-    await logQuery(query, null, userIp, error.message);
+    await logQuery(query, null, userIp, error.message, null, null);
     
     res.status(500).json({ 
       error: 'Query parsing failed',

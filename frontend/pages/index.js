@@ -85,6 +85,36 @@ const ErrorMessage = styled.div`
   margin-top: 1rem;
 `;
 
+const ErrorCard = styled.div`
+  padding: 1.5rem;
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+  border-radius: 0.375rem;
+  margin-top: 1rem;
+`;
+
+const ErrorTitle = styled.h3`
+  color: #dc2626;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+`;
+
+const ErrorDetail = styled.p`
+  color: #7f1d1d;
+  font-size: 0.875rem;
+`;
+
+const DebugInfo = styled.div`
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #fecaca;
+`;
+
+const DebugLabel = styled.span`
+  font-weight: 500;
+  color: #b91c1c;
+`;
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState(null);
@@ -159,6 +189,23 @@ export default function Home() {
       )}
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
+
+      {response?.error && (
+        <ErrorCard>
+          <ErrorTitle>{response.error}</ErrorTitle>
+          <ErrorDetail>{response.details}</ErrorDetail>
+          
+          {response.api && (
+            <DebugInfo>
+              <p><DebugLabel>API:</DebugLabel> {response.api}</p>
+              <p><DebugLabel>Chain:</DebugLabel> {response.chain}</p>
+              {response.params && (
+                <p><DebugLabel>Params:</DebugLabel> {JSON.stringify(response.params)}</p>
+              )}
+            </DebugInfo>
+          )}
+        </ErrorCard>
+      )}
 
       {loading && <Loading>Analyzing blockchain data...</Loading>}
 

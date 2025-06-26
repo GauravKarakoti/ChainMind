@@ -75,13 +75,13 @@ async function parse_query(query) {
     // Collect all stream chunks
     let content = '';
     for await (const chunk of stream) {
-      content += chunk.choices[0]?.delta?.content ?? '';
+      content += chunk.choices[0]?.delta?.content || '';
     }
     console.log('Groq Response:', content);
 
     let parsed;
     try {
-      parsed = JSON.parse(jsonText);
+      parsed = JSON.parse(content);
     } catch (parseError) {
       // Try to extract JSON from malformed responses
       const jsonMatch = content.match(/\{[\s\S]*\}/);

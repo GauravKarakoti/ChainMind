@@ -22,6 +22,19 @@ function normalizeChainData(api, chain, data) {
             currency: 'XRP',
             normalized: data.result.account_data.Balance / 1e6
           };
+        } else if (chainType === 'bitcoin' || chainType === 'dogecoin') {
+          return data.map(tx => ({
+            hash: tx.hash,
+            time: tx.blockTimestamp,
+            inputs: tx.vin.map(input => ({
+              address: input.address,
+              value: input.value
+            })),
+            outputs: tx.vout.map(output => ({
+              address: output.address,
+              value: output.value
+            }))
+          }));
         }
         break;
       

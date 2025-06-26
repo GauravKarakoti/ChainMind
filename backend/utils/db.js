@@ -73,6 +73,24 @@ function initializeDatabase() {
       )
     `);
 
+    db.run(`
+      ALTER TABLE query_history
+      ADD COLUMN api TEXT
+    `, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.error('Error adding api column:', err.message);
+      }
+    });
+    
+    db.run(`
+      ALTER TABLE query_history
+      ADD COLUMN chain TEXT
+    `, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.error('Error adding chain column:', err.message);
+      }
+    });
+
     console.log('Database tables initialized');
   });
 }
@@ -201,12 +219,12 @@ function setApiCache(endpoint, params, response, ttl = 300) {
  * @param {string} userIp 
  * @param {string} error 
  */
-function logQuery(query, response = null, userIp = null, error = null) {
+function logQuery(query, response = null, userIp = null, error = null, api = null, chain = null) {
   return new Promise((resolve, reject) => {
     const stmt = db.prepare(`
       INSERT INTO query_history 
-      (query, response, user_ip, error) 
-      VALUES (?, ?, ?, ?)
+      (query, response, user_ip, error, api, chain) 
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
     
     stmt.run(
@@ -214,6 +232,8 @@ function logQuery(query, response = null, userIp = null, error = null) {
       response ? JSON.stringify(response) : null,
       userIp,
       error,
+      api,
+      chain,
       function(err) {
         if (err) return reject(err);
         resolve(this.lastID);
