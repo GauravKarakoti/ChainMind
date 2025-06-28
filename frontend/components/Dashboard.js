@@ -16,10 +16,28 @@ ChartJS.register(
 
 // CSS for chart containers 
 import styles from './Dashboard.module.css';
+import { useMemo } from 'react';
 
 export default function Dashboard({ data }) {
   console.log('Dashboard data:', data);
-  let transfers={} , dailyStats={} , tokenPrices={} , nftMetadata={}, chartData={};
+  const { api, chain, normalizedData } = data;
+  let transfers={} , dailyStats={} , tokenPrices={} , nftMetadata={}
+  const chartData = useMemo(() => {
+    if (!normalizedData) return null;
+    
+    switch(normalizedData.type) {
+      case 'transfers':
+        return generateTransfersChart(normalizedData.items);
+      case 'stats':
+        return generateStatsChart(normalizedData.items);
+      case 'prices':
+        return generatePricesChart(normalizedData.items);
+      default:
+        return null;
+    }
+  }, [normalizedData]);
+
+  console.log(chartData)
 
   const chainNames = {
     'ethereum/mainnet': 'Ethereum',
@@ -41,46 +59,14 @@ export default function Dashboard({ data }) {
     case 'getTokenTransfersByAccount':
     case 'getTransactionsByAccount':
       transfers = data.transfers;
-      chartData = {
-        labels: transfers?.map(t => t.token),
-        datasets: [{
-          data: transfers?.map(t => t.amount),
-          backgroundColor: transfers.map(() => `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.7)`),
-          borderColor: '#fff',
-          borderWidth: 1
-        }]
-      };
       break;
     case 'getDailyTransactionsStats':
       // Bar chart for daily transaction stats
       dailyStats = data.dailyStats;
-      chartData = {
-        labels: dailyStats.map(d => d.date),
-        datasets: [{
-          label: 'Tx Count',
-          data: dailyStats.map(d => d.count),
-          backgroundColor: `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.7)`,  
-        }]
-      };
       break;
     case 'getTokenPricesByContracts':
       // Doughnut chart for token price metrics (e.g., percentChange7d, percentChange24h, percentChange1h)
       tokenPrices = data.tokenPrices;
-      chartData = tokenPrices.length > 0 ? {
-        labels: ['1h %', '24h %', '7d %'],
-        datasets: [{
-          data: [
-            parseFloat(tokenPrices[0].percentChangeFor1h),
-            parseFloat(tokenPrices[0].percentChangeFor24h),
-            parseFloat(tokenPrices[0].percentChangeFor7d)
-          ],
-          backgroundColor: [
-            tokenPrices.map(() => `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.7)`),
-            tokenPrices.map(() => `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.7)`),
-            tokenPrices.map(() => `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.7)`)
-          ]
-        }]
-      } : null;
       break;
     case 'getNftMetadataByTokenIds':
       nftMetadata = data.data;
@@ -100,7 +86,7 @@ export default function Dashboard({ data }) {
         </div>
       </div>
       <div className={styles.dashboardGrid}>
-        {transfers.length > 0 && (
+        {normalizedData?.type === 'transfers' && normalizedData.items.length > 0 && (
           <div className={styles.chartCard}>
             <h2>Token Distribution</h2>
             <div className={styles.chartContainer}>
@@ -109,7 +95,7 @@ export default function Dashboard({ data }) {
           </div>
         )}
 
-        {dailyStats.length > 0 && (
+        {normalizedData?.type === 'stats' && normalizedData.items.length > 0 && (
           <div className={styles.chartCard}>
             <h2>Daily Transactions</h2>
             <div className={styles.chartContainer}>
@@ -118,7 +104,7 @@ export default function Dashboard({ data }) {
           </div>
         )}
 
-        {tokenPrices.length > 0 && (
+        {normalizedData?.type === 'prices' && normalizedData.items.length > 0 && (
           <div className={styles.chartCard}>
             <h2>Price Change Ratios</h2>
             <h3>The current price is <strong>{tokenPrices[0].price}</strong></h3>
@@ -128,7 +114,7 @@ export default function Dashboard({ data }) {
           </div>
         )}
 
-        {nftMetadata.length > 0 && (
+        {normalizedData?.type === 'nft' && normalizedData.items.length > 0 && (
           <div className={styles.chartCard}>
             <h2 className={styles.chartTitle}>NFT Details</h2>
             {nftMetadata.map(nft => (
@@ -187,4 +173,59 @@ export default function Dashboard({ data }) {
       </div>
     </div>
   );
+}
+
+// Helper functions
+function generateTransfersChart(items) {
+  const aggregated = items.reduce((acc, item) => {
+    const token = item.token || 'Unknown';
+    if (!acc[token]) {
+      acc[token] = 0;
+    }
+    acc[token] += item.amount;
+    return acc;
+  }, {});
+
+  const labels = Object.keys(aggregated);
+  const amounts = Object.values(aggregated);
+  return {
+    labels,
+    datasets: [{
+      data: amounts,
+      backgroundColor: labels.map(() => randomColor())
+    }]
+  };
+}
+
+function generateStatsChart(items) {
+  return {
+    labels: items?.map(d => d.date),
+    datasets: [{
+      label: 'Tx Count',
+      data: items?.map(d => d.count),
+      backgroundColor: randomColor()
+    }]
+  };
+}
+
+function generatePricesChart(items) {
+  return items?.[0] ? {
+    labels: ['1h %', '24h %', '7d %'],
+    datasets: [{
+      data: [
+        items[0].changes['1h'],
+        items[0].changes['24h'],
+        items[0].changes['7d']
+      ],
+      backgroundColor: [
+        randomColor(),
+        randomColor(),
+        randomColor()
+      ]
+    }]
+  } : null;
+}
+
+function randomColor() {
+  return `rgba(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},0.7)`;
 }

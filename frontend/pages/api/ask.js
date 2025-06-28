@@ -14,8 +14,8 @@ export default async function handler(req, res) {
 
     // Get AI interpretation of query
     const aiResponse = await axios.post(
-      // 'http://localhost:3002/api/ai/parse-query',
-      'https://chainmind-backend.onrender.com/api/ai/parse-query',
+      'http://localhost:3002/api/ai/parse-query',
+      // 'https://chainmind-backend.onrender.com/api/ai/parse-query',
       { query, userIp }
     );
     const { api, params, chain } = aiResponse.data;
@@ -30,8 +30,8 @@ export default async function handler(req, res) {
 
     // Call Nodit API through our backend
     const noditResponse = await axios.post(
-      // 'http://localhost:3002/api/nodit/nodit-api',
-      'https://chainmind-backend.onrender.com/api/nodit/nodit-api',
+      'http://localhost:3002/api/nodit/nodit-api',
+      // 'https://chainmind-backend.onrender.com/api/nodit/nodit-api',
       { api, params, chain }
     );
 
@@ -49,12 +49,14 @@ export default async function handler(req, res) {
       ? noditResponse.data.items
       : noditResponse.data;
 
-    // Format response for frontend
-    let result = {
-      data: noditResponse.data,
+    const result = {
+      api,
       chain,
-      api
+      data: noditResponse.data,
+      normalizedData: normalizeResponseData(api, chain, noditResponse.data)
     };
+
+    console.log(result)
 
     const items = payload;
     let grouped = {};
@@ -149,8 +151,8 @@ export default async function handler(req, res) {
     }
 
     // Log via backend API
-    // await axios.post('http://localhost:3002/api/logger/log-query', {
-    await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
+    await axios.post('http://localhost:3002/api/logger/log-query', {
+    // await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
       query,
       response: result,
       userIp,
@@ -173,8 +175,8 @@ export default async function handler(req, res) {
     }
 
     // Log error via backend API
-    // await axios.post('http://localhost:3002/api/logger/log-query', {
-    await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
+    await axios.post('http://localhost:3002/api/logger/log-query', {
+    // await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
       query,
       response: null,
       userIp,
@@ -185,5 +187,120 @@ export default async function handler(req, res) {
       error: userMessage,
       details
     });
+  }
+}
+
+function normalizeResponseData(api, chain, rawData) {
+  const chainName = chain.split('/')[0];
+  console.log("raw data: ",rawData);
+  
+  switch(api) {
+    case 'getTokenTransfersByAccount':
+    case 'getTransactionsByAccount':
+      switch (chainName) {
+        case 'ethereum':
+          return {
+            type: 'transfers',
+            items: rawData.items?.map(t => ({
+              token: t.contract?.symbol,
+              contractAddress: t.contract?.address,
+              amount: t.normalizedAmount != null
+                ? t.normalizedAmount
+                : t.value / Math.pow(10, t.tokenDecimal || 18),
+              from: t.from,
+              to: t.to,
+              timestamp: t.timestamp,
+              transactionHash: t.transactionHash
+            })),
+            chain: chainName
+          };
+          break;
+        
+        case 'xrpl':
+          return {
+            type: 'transfers',
+            items: rawData.items?.map(t => ({
+              token: t.transactionType,
+              amount: parseFloat(t.fee),
+              from: t.account,
+              to: t.destination || null,
+              timestamp: t.ledgerTimestamp,
+              transactionHash: t.transactionHash
+            })),
+            chain: chainName
+          };
+          break;
+        
+        case 'tron':
+          return {
+            type: 'transfers',
+            items: rawData.items?.map(t => ({
+              token: t.type,
+              amount: t.value,
+              from: t.account,
+              to: t.toAddress || null,
+              timestamp: t.ledgerTimestamp,
+              transactionHash: t.transactionHash
+            })),
+            chain: chainName
+          };
+          break;
+
+        case 'bitcoin':
+        case 'dogecoin':
+          return {
+            type: 'transfers',
+            items: rawData.items?.map(t => ({
+              token: t.vin.length >= t.vout.length ? 'input' : 'output',
+              amount: Math.abs(t.vout.length - t.vin.length),
+              timestamp: t.blockTimestamp,
+              transactionHash: t.hash
+            })),
+            chain: chainName
+          };
+          break;
+
+        default:
+          return res.status(400).json({ error: 'Unsupported blockchain' });
+      }
+      
+    case 'getDailyTransactionsStats':
+      return {
+        type: 'stats',
+        items: rawData.items.map(stat => ({
+          date: stat.date,
+          count: stat.count
+        })),
+        chain: chainName
+      };
+      
+    case 'getTokenPricesByContracts':
+      return {
+        type: 'prices',
+        items: rawData.map(price => ({
+          price: price.price,
+          changes: {
+            '1h': price.percentChangeFor1h,
+            '24h': price.percentChangeFor24h,
+            '7d': price.percentChangeFor7d
+          }
+        })),
+        chain: chainName
+      };
+      
+    case 'getNftMetadataByTokenIds':
+      return {
+        type: 'nft',
+        items: rawData.data?.map(nft => ({
+          contract: nft.contract?.name,
+          tokenId: nft.tokenId,
+          image: nft.contracts?.logoUrl,
+          metadata: nft.rawMetadata
+        })),
+        chain: chainName
+      };
+      
+    default:
+      return { type: 'raw', data: rawData };
   }
 }

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { getApiCache, setApiCache } = require('../utils/db');
-const { normalizeChainData } = require('../utils/normalize');
 
 const tokens = {
   "AAVE": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
@@ -199,10 +198,7 @@ router.post('/nodit-api', async (req, res) => {
     console.log(url,body,{headers});
 
     const response = await noditClient.post(url, body);
-    let result = response.data;
-    
-    // Normalize data across chains
-    result = normalizeChainData(api, chain, result);
+    const result = response.data;
 
     // Cache for 5 minutes
     await setApiCache(cacheKey, result, 300);

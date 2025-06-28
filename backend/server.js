@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const webhookServer = require('./webhooks');
 
-const PORT = 3002;
+const PORT = process.env.PORT;
 const WEBHOOK_PORT = 3001;
 
 app.use(express.json());
