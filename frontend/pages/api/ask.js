@@ -5,6 +5,7 @@ export default async function handler(req, res) {
   const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   console.log('REQ.BODY:', req.body);
   const { query } = req.body;
+  const URL=process.env.URL
 
   try {
     // Validate input
@@ -14,8 +15,7 @@ export default async function handler(req, res) {
 
     // Get AI interpretation of query
     const aiResponse = await axios.post(
-      'http://localhost:3002/api/ai/parse-query',
-      // 'https://chainmind-backend.onrender.com/api/ai/parse-query',
+      `${URL}/api/ai/parse-query`,
       { query, userIp }
     );
     const { api, params, chain } = aiResponse.data;
@@ -30,8 +30,7 @@ export default async function handler(req, res) {
 
     // Call Nodit API through our backend
     const noditResponse = await axios.post(
-      'http://localhost:3002/api/nodit/nodit-api',
-      // 'https://chainmind-backend.onrender.com/api/nodit/nodit-api',
+      `${URL}/api/nodit/nodit-api`,
       { api, params, chain }
     );
 
@@ -151,8 +150,7 @@ export default async function handler(req, res) {
     }
 
     // Log via backend API
-    await axios.post('http://localhost:3002/api/logger/log-query', {
-    // await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
+    await axios.post(`${URL}/api/logger/log-query`, {
       query,
       response: result,
       userIp,
@@ -175,8 +173,7 @@ export default async function handler(req, res) {
     }
 
     // Log error via backend API
-    await axios.post('http://localhost:3002/api/logger/log-query', {
-    // await axios.post('https://chainmind-backend.onrender.com/api/logger/log-query', {
+    await axios.post(`${URL}/api/logger/log-query`, {
       query,
       response: null,
       userIp,
