@@ -3,7 +3,7 @@ const { sendTelegramAlert } = require('../utils/notification');
 const { db } = require('../utils/db');
 const axios = require('axios');
 
-const ALERT_INTERVAL = 10000; // 5 minutes
+const ALERT_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 async function checkPriceAlerts() {
   try {
