@@ -91,6 +91,39 @@ function initializeDatabase() {
       }
     });
 
+    db.run(`
+      CREATE TABLE IF NOT EXISTS alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        chain TEXT NOT NULL,
+        token TEXT NOT NULL,
+        chatID TEXT NOT NULL,
+        condition TEXT NOT NULL,
+        value REAL NOT NULL,
+        frequency TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+      `, (err) => {
+        if (err) console.error('Error creating alerts table:', err.message);
+        else console.log('Alerts table initialized');
+    });
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS price_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        status TEXT NOT NULL,
+        source TEXT,
+        token TEXT,
+        price REAL,
+        error TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     console.log('Database tables initialized');
   });
 }

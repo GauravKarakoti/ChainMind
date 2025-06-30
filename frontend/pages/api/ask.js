@@ -286,14 +286,15 @@ function normalizeResponseData(api, chain, rawData) {
       };
       
     case 'getNftMetadataByTokenIds':
+      const items=rawData?.map(nft => ({
+        contract: nft.contract?.name,
+        tokenId: nft.tokenId,
+        image: nft.contracts?.logoUrl,
+        metadata: nft.rawMetadata
+      }))
       return {
         type: 'nft',
-        items: rawData.data?.map(nft => ({
-          contract: nft.contract?.name,
-          tokenId: nft.tokenId,
-          image: nft.contracts?.logoUrl,
-          metadata: nft.rawMetadata
-        })),
+        items: items,
         chain: chainName
       };
       

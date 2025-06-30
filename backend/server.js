@@ -22,6 +22,11 @@ app.use('/api/logger', loggerRouter);
 const aiRouter = require('./routes/ai');
 app.use('/api/ai', aiRouter);
 
+const alertRouter = require('./routes/alerts');
+require('./workers/alertWorker'); // Start alert worker
+
+app.use('/api/alerts', alertRouter);
+
 app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`);
 });

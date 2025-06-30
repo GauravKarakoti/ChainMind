@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Dashboard from '../components/Dashboard';
+import AlertConfig from '../components/AlertConfig';
 import axios from 'axios';
-import { Tooltip } from 'react-tooltip';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Bell } from 'lucide-react';
 
 const EXAMPLE_QUERIES = [
   "Show my token transfers on 0x...",
@@ -13,10 +13,48 @@ const EXAMPLE_QUERIES = [
   "Portfolio performance on T..."
 ];
 
+// Styled Components
 const Container = styled.div`
   max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+`;
+
+const HeaderTitle = styled.h1`
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+`;
+
+const HeaderButtonGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const HeaderButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background-color: ${props => props.primary ? '#e0e7ff' : '#dbeafe'};
+  color: ${props => props.primary ? '#4f46e5' : '#1d4ed8'};
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: ${props => props.primary ? '#c7d2fe' : '#bfdbfe'};
+  }
 `;
 
 const SearchContainer = styled.div`
@@ -29,7 +67,7 @@ const SearchContainer = styled.div`
   background: white;
 `;
 
-const Input = styled.input`
+const SearchInput = styled.input`
   flex: 1;
   padding: 0.8rem 1rem;
   border: 2px solid #e2e8f0;
@@ -43,11 +81,7 @@ const Input = styled.input`
   }
 `;
 
-const ExampleDiv = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const Button = styled.button`
+const SearchButton = styled.button`
   padding: 0.8rem 1.5rem;
   background-color: #6366f1;
   color: white;
@@ -67,14 +101,98 @@ const Button = styled.button`
   }
 `;
 
-const ExampleButton = styled.button`
-  margin-right: 0.8rem;
+const ExamplesContainer = styled.div`
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
 `;
 
-const Loading = styled.div`
-  text-align: center;
-  padding: 2rem;
-  color: #64748b;
+const ExamplesTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #374151;
+`;
+
+const ExamplesGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+`;
+
+const ExampleButton = styled.button`
+  padding: 0.25rem 0.75rem;
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #bfdbfe;
+  }
+`;
+
+const AlertsPanel = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+const AlertsList = styled.div`
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const AlertsTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #111827;
+`;
+
+const AlertItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+`;
+
+const AlertInfo = styled.div`
+  flex: 1;
+`;
+
+const AlertName = styled.div`
+  font-weight: 500;
+  color: #1f2937;
+`;
+
+const AlertDetails = styled.div`
+  font-size: 0.875rem;
+  color: #6b7280;
+`;
+
+const DeleteButton = styled.button`
+  color: #ef4444;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: #dc2626;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -115,24 +233,29 @@ const DebugLabel = styled.span`
   color: #b91c1c;
 `;
 
+const LoadingIndicator = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+`;
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showExamples, setShowExamples] = useState(false);
+  const [showAlerts, setShowAlerts] = useState(false);
+  const [userAlerts, setUserAlerts] = useState([]);
 
   const handleAsk = async () => {
-    if (!query.trim()) {
-      // Don’t send a request if the input is empty/whitespace.
-      return;
-    }
+    if (!query.trim()) return;
+    
     try {
       setLoading(true);
       setError(null);
       const res = await axios.post('/api/ask', { query });
       setResponse(res.data);
-      console.log(res.data);
     } catch (err) {
       setError('Failed to get response. Please try again.');
       console.error('Error fetching data:', err);
@@ -141,41 +264,85 @@ export default function Home() {
     }
   };
 
+  const handleCreateAlert = async (alertData) => {
+    try {
+      const userId = "user-123"; // Should come from auth system
+      const response = await axios.post('/api/alert', {
+        ...alertData,
+        userId
+      });
+      
+      setUserAlerts([...userAlerts, response.data]);
+      setShowAlerts(false);
+      alert('Alert created successfully!');
+    } catch (err) {
+      console.error('Failed to create alert:', err);
+      alert(`Failed to create alert: ${err.response?.data?.error || err.message}`);
+    }
+  };
+
+  const handleDeleteAlert = async (id) => {
+    try {
+      await axios.delete(`/api/alert?alertId=${id}`);
+      setUserAlerts(userAlerts.filter(alert => alert.id !== id));
+    } catch (err) {
+      console.error('Failed to delete alert:', err);
+      alert(`Failed to delete alert: ${err.response?.data?.error || err.message}`);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserAlerts = async () => {
+      try {
+        const userId = "user-123"; // Should come from auth system
+        const response = await axios.get(`/api/alert?userId=${userId}`);
+        setUserAlerts(response.data);
+      } catch (err) {
+        console.error('Failed to fetch alerts:', err);
+      }
+    };
+    
+    fetchUserAlerts();
+  }, []);
+
   return (
     <Container>
+      <Header>
+        <HeaderTitle>ChainMind Analytics</HeaderTitle>
+        <HeaderButtonGroup>
+          <HeaderButton 
+            primary 
+            onClick={() => setShowAlerts(!showAlerts)}
+          >
+            <Bell size={16} />
+            Alerts {userAlerts.length > 0 && `(${userAlerts.length})`}
+          </HeaderButton>
+          <HeaderButton onClick={() => setShowExamples(!showExamples)}>
+            <HelpCircle size={16} />
+            Examples
+          </HeaderButton>
+        </HeaderButtonGroup>
+      </Header>
+      
       <SearchContainer>
-        <Input
+        <SearchInput
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="e.g., token transfers, NFT data, portfolio performance..."
           onKeyPress={(e) => e.key === 'Enter' && handleAsk()}
         />
-        <HelpCircle 
-          className="absolute right-3 top-3 text-gray-400 cursor-pointer"
-          size={20}
-          onClick={() => setShowExamples(!showExamples)}
-          data-tooltip-id="help-tooltip"
-        />
-        <Tooltip id="help-tooltip" place="top">
-          Show example queries
-        </Tooltip>
-        <Button onClick={handleAsk} disabled={!query.trim() || loading}>
-          {loading ? (
-            <span className="flex items-center">
-              Analyzing...
-            </span>
-          ) : 'Ask ChainMind'}
-        </Button>
+        <SearchButton onClick={handleAsk} disabled={!query.trim() || loading}>
+          {loading ? 'Analyzing...' : 'Ask ChainMind'}
+        </SearchButton>
       </SearchContainer>
       
       {showExamples && (
-        <ExampleDiv className="mb-4 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-medium mb-2">Try these examples:</h3>
-          <div className="flex flex-wrap gap-2 p-2">
+        <ExamplesContainer>
+          <ExamplesTitle>Try these examples:</ExamplesTitle>
+          <ExamplesGrid>
             {EXAMPLE_QUERIES.map((example, i) => (
               <ExampleButton
                 key={i}
-                className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-full"
                 onClick={() => {
                   setQuery(example);
                   handleAsk();
@@ -184,8 +351,35 @@ export default function Home() {
                 {example}
               </ExampleButton>
             ))}
-          </div>
-        </ExampleDiv>
+          </ExamplesGrid>
+        </ExamplesContainer>
+      )}
+
+      {showAlerts && (
+        <AlertsPanel>
+          <AlertConfig onSave={handleCreateAlert} />
+          
+          {userAlerts.length > 0 && (
+            <AlertsList>
+              <AlertsTitle>Your Active Alerts</AlertsTitle>
+              <div>
+                {userAlerts.map(alert => (
+                  <AlertItem key={alert.id}>
+                    <AlertInfo>
+                      <AlertName>{alert.name}</AlertName>
+                      <AlertDetails>
+                        {alert.token} price {alert.condition} ${alert.value} on {alert.chain.split('/')[0]}
+                      </AlertDetails>
+                    </AlertInfo>
+                    <DeleteButton onClick={() => handleDeleteAlert(alert.id)}>
+                      Delete
+                    </DeleteButton>
+                  </AlertItem>
+                ))}
+              </div>
+            </AlertsList>
+          )}
+        </AlertsPanel>
       )}
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -207,13 +401,9 @@ export default function Home() {
         </ErrorCard>
       )}
 
-      {loading && <Loading>Analyzing blockchain data...</Loading>}
+      {loading && <LoadingIndicator>Analyzing blockchain data...</LoadingIndicator>}
 
-      {response && (
-        <>
-          <Dashboard data={response} />
-        </>
-      )}
+      {response && <Dashboard data={response} />}
     </Container>
   );
 }
