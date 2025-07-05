@@ -38,6 +38,10 @@ async function handleBlockchainEvent(event) {
   }
 }
 
+async function sendNotifications(alert, message) {
+  await sendTelegramAlert(alert, message);
+}
+
 async function sendTelegramAlert(data) {
   try {
     console.log(data)
@@ -89,5 +93,6 @@ async function triggerZapierWorkflow(workflowType, data) {
 module.exports = {
   handleBlockchainEvent,
   sendTelegramAlert,
-  triggerZapierWorkflow
+  triggerZapierWorkflow,
+  sendNotifications
 };

@@ -15,6 +15,7 @@
     "axios": "^1.10.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
+    "ethers": "^6.15.0",
     "express": "^5.1.0",
     "fs": "^0.0.1-security",
     "groq-sdk": "^0.25.0",
@@ -25,7 +26,9 @@
     "nodemon": "^3.1.10",
     "path": "^0.12.7",
     "sqlite3": "^5.1.7",
-    "twilio": "^5.7.1"
+    "tronweb": "^6.0.3",
+    "twilio": "^5.7.1",
+    "xrpl": "^4.3.0"
   },
   "engines": {
     "node": ">=18.x"

@@ -1,9 +1,9 @@
 const { getTokenPrice } = require('../utils/cache');
-const { sendTelegramAlert } = require('../utils/notification');
+const { sendTelegramAlert, sendNotifications } = require('../utils/notification');
 const { db } = require('../utils/db');
-const axios = require('axios');
+const { fetchAccountActivity, fetchEthGasPrice, fetchLargeTransfers, getAlertsByType } = require("./alerts.js")
 
-const ALERT_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const ALERT_INTERVAL = 10000; // 5 minutes
 
 async function checkPriceAlerts() {
   try {
@@ -66,6 +66,50 @@ async function checkPriceAlerts() {
   }
 }
 
+async function checkAlerts() {
+  await checkPriceAlerts();
+  await checkGasAlerts();
+  await checkWhaleAlerts();
+  await checkAccountActivityAlerts();
+}
+
+async function checkGasAlerts() {
+  const alerts = await getAlertsByType('gas');
+  const ethGasPrice = await fetchEthGasPrice();
+  
+  for (const alert of alerts) {
+    if ((alert.condition === 'above' && ethGasPrice > alert.value) ||
+        (alert.condition === 'below' && ethGasPrice < alert.value)) {
+      const message = `Gas price alert: ${ethGasPrice} gwei (${alert.condition} ${alert.value})`;
+      await sendNotifications(alert, message);
+    }
+  }
+}
+
+async function checkWhaleAlerts() {
+  const alerts = await getAlertsByType('whale');
+  
+  for (const alert of alerts) {
+    const largeTransfers = await fetchLargeTransfers(alert.chain, alert.token, alert.value);
+    if (largeTransfers.length > 0) {
+      const message = `Whale alert: ${largeTransfers.length} large transfers detected`;
+      await sendNotifications(alert, message);
+    }
+  }
+}
+
+async function checkAccountActivityAlerts() {
+  const alerts = await getAlertsByType('account-activity');
+  
+  for (const alert of alerts) {
+    const activity = await fetchAccountActivity(alert.chain, alert.accountAddress);
+    if (activity > alert.value) {
+      const message = `Account activity alert: ${activity} transactions (${alert.condition} ${alert.value})`;
+      await sendNotifications(alert, message);
+    }
+  }
+}
+
 // Start the worker
-setInterval(checkPriceAlerts, ALERT_INTERVAL);
+setInterval(checkAlerts, ALERT_INTERVAL);
 console.log('Alert worker started');

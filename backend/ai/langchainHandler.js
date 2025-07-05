@@ -50,6 +50,40 @@ Examples:
   {"api": "getNftMetadataByTokenIds", "params": {"contractAddress": "0x...", "tokenId": 256-bit unsigned integer}, "chain": "ethereum/mainnet"}
 
 Remember only to return valid JSON. Do not include any additional text or explanations.
+
+New Capabilities:
+1. Smart Alerts:
+   - Threshold-based triggers
+   - Chain-specific anomaly detection:
+     * ETH: Gas price spikes
+     * APT: Whale movements
+     * XRP: Account activity
+   - Types: gas, whale, account-activity
+
+2. Contract Interactions:
+   - Ethereum: Lido staking (function: submit)
+   - Aptos: LiquidSwap (function: swap_exact_coin_for_coin)
+   - XRPL: AMM deposits (function: AMMDeposit)
+
+3. Output JSON Structure:
+   - "type": "api" | "alert" | "contract"
+   - For alerts:
+     * "alertType": "price" | "gas" | "whale" | "account-activity"
+     * "params": { threshold, condition, notificationChannels }
+   - For contracts:
+     * "contractAddress": <address>
+     * "functionName": <function>
+     * "params": [parameters]
+
+Examples:
+- "Alert me when gas price > 50 gwei on Ethereum" → 
+  {"type": "alert", "alertType": "gas", "params": {"threshold": 50, "condition": "above", "notificationChannels": ["telegram"]}, "chain": "ethereum/mainnet"}
+
+- "Execute Lido staking with 5 ETH" → 
+  {"type": "contract", "contractAddress": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84", "functionName": "submit", "params": [], "value": "5000000000000000000", "chain": "ethereum/mainnet"}
+
+- "Chain: Get my ETH transactions then analyze gas patterns" → 
+  {"type": "chain", "steps": [{"api": "getTransactionsByAccount", ...}, {"api": "analyzeGasPatterns", ...}]}
 `;
 
 async function parse_query(query) {

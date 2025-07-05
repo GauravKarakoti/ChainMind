@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       `${URL}/api/ai/parse-query`,
       { query, userIp }
     );
-    const { api, params, chain } = aiResponse.data;
+    const { api, params, chain, type } = aiResponse.data;
     console.log('AI Response:', { api, params, chain });
 
     if (aiResponse.data.error) {
@@ -51,9 +51,39 @@ export default async function handler(req, res) {
     const result = {
       api,
       chain,
+      type,
       data: noditResponse.data,
       normalizedData: normalizeResponseData(api, chain, noditResponse.data)
     };
+
+    if (result.type === 'alert') {
+      return res.status(200).json({
+        action: 'createAlert',
+        alertData: {
+          type: result.alertType,
+          ...result.params,
+          chain: result.chain
+        }
+      });
+    }
+
+    if (result.type === 'contract') {
+      return res.status(200).json({
+        action: 'contractInteraction',
+        contractData: {
+          contractAddress: result.contractAddress,
+          functionName: result.functionName,
+          params: result.params,
+          value: result.value,
+          chain: result.chain
+        }
+      });
+    }
+
+    if (result.type === 'chain') {
+      const chainResult = await processQueryChain(result.steps);
+      return res.status(200).json(chainResult);
+    }
 
     console.log(result)
 

@@ -10,7 +10,9 @@ export default function AlertConfig({ onSave }) {
     chatID: '',
     condition: 'above',
     value: 0,
-    frequency: 'once'
+    frequency: 'once',
+    type: 'price',
+    thresholdType: 'value',
   });
 
   const handleSubmit = (e) => {
@@ -108,6 +110,56 @@ export default function AlertConfig({ onSave }) {
               <option value="recurring">Recurring</option>
             </select>
           </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Type</label>
+            <select
+              value={alert.type}
+              onChange={(e) => setAlert({...alert, type: e.target.value})}
+              className={styles.select}
+            >
+              <option value="price">Price</option>
+              <option value="gas">Gas</option>
+              <option value="whale">Whale</option>
+            </select>
+          </div>
+
+          {alert.type === 'gas' && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Gas Threshold (gwei)</label>
+              <input
+                type="number"
+                value={alert.value}
+                className={styles.input}
+                onChange={e => setAlert({...alert, value: e.target.value})}
+              />
+            </div>
+          )}
+
+          {alert.type === 'whale' && (
+            <>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Threshold Type</label>
+                <select
+                  value={alert.thresholdType}
+                  onChange={e => setAlert({...alert, thresholdType: e.target.value})}
+                  className={styles.select}
+                >
+                  <option value="value">USD Value</option>
+                  <option value="percentage">% Supply</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Threshold {alert.thresholdType === 'value' ? '($)' : '(%)'}</label>
+                <input
+                  type="number"
+                  value={alert.value}
+                  onChange={e => setAlert({...alert, value: e.target.value})}
+                  className={styles.valueInput}
+                />
+              </div>
+            </>
+          )}
         </div>
         
         <div className={styles.buttonContainer}>
