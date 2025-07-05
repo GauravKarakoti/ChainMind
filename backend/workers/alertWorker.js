@@ -3,7 +3,7 @@ const { sendTelegramAlert, sendNotifications } = require('../utils/notification'
 const { db } = require('../utils/db');
 const { fetchAccountActivity, fetchEthGasPrice, fetchLargeTransfers, getAlertsByType } = require("./alerts.js")
 
-const ALERT_INTERVAL = 10000; // 5 minutes
+const ALERT_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 async function checkPriceAlerts() {
   try {
