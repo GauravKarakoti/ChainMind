@@ -18,6 +18,14 @@ export default async function handler(req, res) {
       `${URL}/api/ai/parse-query`,
       { query, userIp }
     );
+
+    if (aiResponse.data.type === 'general') {
+      return res.status(200).json({
+        type: 'general',
+        response: aiResponse.data.response
+      });
+    }
+    
     const { api, params, chain, type } = aiResponse.data;
     console.log('AI Response:', { api, params, chain });
 

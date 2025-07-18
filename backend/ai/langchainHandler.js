@@ -84,6 +84,16 @@ Examples:
 
 - "Chain: Get my ETH transactions then analyze gas patterns" → 
   {"type": "chain", "steps": [{"api": "getTransactionsByAccount", ...}, {"api": "analyzeGasPatterns", ...}]}
+
+If the query is not related to blockchain data or cannot be mapped to an API, alert, or contract interaction, then return a general response in JSON format:
+
+{"type": "general", "response": "Your helpful response here"}
+
+Examples:
+- "What is the meaning of life?" → 
+  {"type": "general", "response": "The meaning of life is 42, according to Deep Thought."}
+- "Explain blockchain technology" → 
+  {"type": "general", "response": "Blockchain is a decentralized digital ledger..."}
 `;
 
 async function parse_query(query) {
@@ -126,9 +136,15 @@ async function parse_query(query) {
       }
     }
 
-    // Validate required fields
-    if (!parsed.api || !parsed.chain) {
-      throw new Error('Groq response missing required fields');
+    if (parsed.type === 'api') {
+      if (!parsed.api || !parsed.chain) {
+        throw new Error('Groq response missing required fields for API call');
+      }
+    } 
+    else if (parsed.type === 'general') {
+      if (!parsed.response) {
+        throw new Error('Groq response missing response field for general type');
+      }
     }
 
     return parsed;

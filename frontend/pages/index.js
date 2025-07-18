@@ -4,6 +4,7 @@ import Dashboard from '../components/Dashboard';
 import AlertConfig from '../components/AlertConfig';
 import axios from 'axios';
 import { HelpCircle, Bell } from 'lucide-react';
+import GeneralResponse from '../components/GeneralResponse';
 
 const EXAMPLE_QUERIES = [
   "Show my token transfers on 0x...",
@@ -403,7 +404,13 @@ export default function Home() {
 
       {loading && <LoadingIndicator>Analyzing blockchain data...</LoadingIndicator>}
 
-      {response && <Dashboard data={response} />}
+      {response && response.type === 'general' && (
+        <GeneralResponse response={response.response} />
+      )}
+      
+      {response && response.type !== 'general' && (
+        <Dashboard data={response} />
+      )}
     </Container>
   );
 }
