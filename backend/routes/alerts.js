@@ -125,8 +125,16 @@ router.patch('/:id/toggle', async (req, res) => {
         }
       );
     });
+    console.log(`Alert ${id} toggled to ${active}`);
+
+    const updatedAlert = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM alerts WHERE id = ?', [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
     
-    res.status(200).json({ success: true, active });
+    res.status(200).json(formatAlert(updatedAlert));
   } catch (err) {
     res.status(500).json({ error: 'Failed to toggle alert' });
   }

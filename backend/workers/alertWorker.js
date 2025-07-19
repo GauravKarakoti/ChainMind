@@ -40,6 +40,8 @@ async function checkPriceAlerts() {
         
         // Check if alert is in cooldown
         if (now - lastTriggerTime < cooldownMs) continue;
+        if (!alert.is_active) continue;
+
 
         let shouldTrigger = false;
         if (alert.condition === 'above' && price > alert.value) {
@@ -90,6 +92,7 @@ async function checkGasAlerts() {
     const cooldownMs = alert.cooldown * 60 * 1000;
     
     if (now - lastTriggerTime < cooldownMs) continue;
+    if (!alert.is_active) continue;
 
     if ((alert.condition === 'above' && ethGasPrice > alert.value) ||
         (alert.condition === 'below' && ethGasPrice < alert.value)) {
@@ -114,6 +117,7 @@ async function checkWhaleAlerts() {
     const cooldownMs = alert.cooldown * 60 * 1000;
     
     if (now - lastTriggerTime < cooldownMs) continue;
+    if (!alert.is_active) continue;
 
     const largeTransfers = await fetchLargeTransfers(alert.chain, alert.token, alert.value);
     if (largeTransfers.length > 0) {
@@ -138,6 +142,7 @@ async function checkAccountActivityAlerts() {
     const cooldownMs = alert.cooldown * 60 * 1000;
     
     if (now - lastTriggerTime < cooldownMs) continue;
+    if (!alert.is_active) continue;
 
     const activity = await fetchAccountActivity(alert.chain, alert.accountAddress);
     if (activity > alert.value) {

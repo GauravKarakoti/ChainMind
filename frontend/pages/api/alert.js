@@ -3,11 +3,11 @@ import axios from 'axios';
 export default async function handler(req, res) {
   const backendBaseUrl = process.env.URL;
   const { method } = req;
-  const { userId } = req.query;
+  const { userId, alertId } = req.query;
+  const { active } = req.body;
 
   try {
     // Handle different HTTP methods
-    const { alertId } = req.query;
     switch (method) {
       case 'GET':
         // Fetch user alerts
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         if (!alertId) {
           return res.status(400).json({ error: 'Missing alert ID' });
         }
-        await axios.patch(`${backendBaseUrl}/api/alerts/${alertId}/toggle`,{ active });
+        await axios.patch(`${backendBaseUrl}/api/alerts/${alertId}/toggle`, { active });
         return res.status(204).end();
 
       default:

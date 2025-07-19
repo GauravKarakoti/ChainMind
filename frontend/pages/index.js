@@ -318,7 +318,7 @@ export default function Home() {
 
   const handleUpdateAlert = async (alertData) => {
     try {
-      const response = await axios.put(`/api/alert/${alertData.id}`, alertData);
+      const response = await axios.put(`/api/alert?alertId=${alertData.id}`, alertData);
       setUserAlerts(userAlerts.map(a => a.id === alertData.id ? response.data : a));
       setEditingAlert(null);
       setShowAlerts(false);
@@ -329,7 +329,7 @@ export default function Home() {
 
   const handleToggleAlert = async (id, active) => {
     try {
-      await axios.patch(`/api/alert/${id}/toggle`, { active });
+      await axios.patch(`/api/alert?alertId=${id}`, { active });
       setUserAlerts(userAlerts.map(a => a.id === id ? {...a, active} : a));
     } catch (err) {
       console.error('Failed to toggle alert:', err);
