@@ -156,7 +156,8 @@ router.patch('/:id/toggle', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const updateData = req.body;
+  const updateData = req.body.updateData;
+  console.log('Update data:', updateData);
   
   try {
     const stmt = db.prepare(`
@@ -166,6 +167,7 @@ router.put('/:id', async (req, res) => {
           cooldown = ?, custom_message = ?, createdAt = ?, lastTriggered = ?, is_active = ?
       WHERE id = ?
     `);
+    console.log('DB prepared')
     
     await new Promise((resolve, reject) => {
       stmt.run(
@@ -177,18 +179,21 @@ router.put('/:id', async (req, res) => {
         updateData.condition,
         updateData.value,
         updateData.frequency,
-        updateData.cooldown,
-        updateData.custom_message,
+        updateData.cooldown || 5,
+        updateData.custom_message || '',
         updateData.createdAt || new Date().toISOString(),
         updateData.lastTriggered || null,
         updateData.active,
         id,
         function(err) {
-          if (err) reject(err);
-          else resolve(this);
+          if (err) {
+            console.error('Failed to update alert:', err);
+            reject(err);
+          } else resolve(this);
         }
       );
     });
+    console.log(`Alert ${id} updated with data`);
 
     await new Promise((resolve, reject) => {
       db.run(

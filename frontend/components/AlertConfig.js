@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { X, Check, ChevronDown, Bell, Zap, Activity, DollarSign } from 'lucide-react';
 import styles from './AlertConfig.module.css';
 
-export default function AlertConfig({ onSave, onCancel }) {
+export default function AlertConfig({ onSave, onCancel, initialData }) {
   const [alertType, setAlertType] = useState('price');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [tokenSuggestions, setTokenSuggestions] = useState([]);
   
   const [alert, setAlert] = useState({
+    id: initialData?.id || null,
     name: '',
     type: 'price',
     chain: 'ethereum/mainnet',

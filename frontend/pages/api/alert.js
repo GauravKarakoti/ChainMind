@@ -4,7 +4,8 @@ export default async function handler(req, res) {
   const backendBaseUrl = process.env.URL;
   const { method } = req;
   const { userId, alertId } = req.query;
-  const { active } = req.body;
+  const { active, updateData } = req.body;
+  console.log('updated alert data:', updateData);
 
   try {
     // Handle different HTTP methods
@@ -47,8 +48,15 @@ export default async function handler(req, res) {
         await axios.patch(`${backendBaseUrl}/api/alerts/${alertId}/toggle`, { active });
         return res.status(204).end();
 
+      case 'PUT':
+        if (!alertId) {
+          return res.status(400).json({ error: 'Missing alert ID' });
+        }
+        await axios.put(`${backendBaseUrl}/api/alerts/${alertId}`, { updateData });
+        return res.status(204).end();
+
       default:
-        res.setHeader('Allow', ['GET', 'POST', 'DELETE','PATCH']);
+        res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'PATCH', 'PUT']);
         return res.status(405).end(`Method ${method} Not Allowed`);
     }
   } catch (error) {
