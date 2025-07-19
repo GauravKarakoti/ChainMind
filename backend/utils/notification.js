@@ -38,18 +38,43 @@ async function handleBlockchainEvent(event) {
   }
 }
 
-async function sendNotifications(alert, message) {
-  await sendTelegramAlert(alert, message);
+function formatPriceAlert(alert, currentValue) {
+  return alert.custom_message || `🚨 ${alert.token} price is now $${currentValue} (${alert.condition} $${alert.value})`;
 }
 
-async function sendTelegramAlert(data) {
+function formatGasAlert(alert, currentValue) {
+  return alert.custom_message || `⛽ Gas price on ${alert.chain.split('/')[0]} is ${currentValue} gwei (${alert.condition} ${alert.value} gwei)`;
+}
+
+async function sendNotifications(alert, message, value) {
+  if (alert.lastTriggered && new Date() - new Date(alert.lastTriggered) < alert.cooldown * 60 * 1000) {
+    return;
+  }
+  
+  // Format message based on alert type
+  let formattedMessage;
+  console.log('Sending notification for alert:', alert);
+  switch(alert.type) {
+    case 'price':
+      formattedMessage = formatPriceAlert(alert, value);
+      break;
+    case 'gas':
+      formattedMessage = formatGasAlert(alert, value);
+      break;
+    default:
+      formattedMessage = message;
+  }
+  await sendTelegramAlert(alert, formattedMessage);
+}
+
+async function sendTelegramAlert(data, message) {
   try {
     console.log(data)
     const response = await axios.post(
       `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
       {
         chat_id: data.chatID,
-        text: `Blockchain Alert: ${data.message}`,
+        text: `Blockchain Alert: ${message}`,
         parse_mode: 'HTML'
       }
     );

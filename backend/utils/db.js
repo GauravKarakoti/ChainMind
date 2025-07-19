@@ -102,6 +102,8 @@ function initializeDatabase() {
         condition TEXT NOT NULL,
         value REAL NOT NULL,
         frequency TEXT NOT NULL,
+        cooldown INTEGER DEFAULT 5,
+        custom_message TEXT,
         user_id TEXT NOT NULL,
         is_active BOOLEAN DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP

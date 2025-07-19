@@ -5,6 +5,7 @@ import AlertConfig from '../components/AlertConfig';
 import axios from 'axios';
 import { HelpCircle, Bell } from 'lucide-react';
 import GeneralResponse from '../components/GeneralResponse';
+import AlertCard from '../components/AlertCard';
 
 const EXAMPLE_QUERIES = [
   "Show my token transfers on 0x...",
@@ -240,6 +241,23 @@ const LoadingIndicator = styled.div`
   color: #64748b;
 `;
 
+const AlertStats = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+const AlertGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+`;
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState(null);
@@ -248,6 +266,12 @@ export default function Home() {
   const [showExamples, setShowExamples] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [userAlerts, setUserAlerts] = useState([]);
+  const [editingAlert, setEditingAlert] = useState(null);
+
+  const handleEditAlert = (alert) => {
+    setEditingAlert(alert);
+    setShowAlerts(true);
+  };
 
   const handleAsk = async () => {
     if (!query.trim()) return;
@@ -289,6 +313,26 @@ export default function Home() {
     } catch (err) {
       console.error('Failed to delete alert:', err);
       alert(`Failed to delete alert: ${err.response?.data?.error || err.message}`);
+    }
+  };
+
+  const handleUpdateAlert = async (alertData) => {
+    try {
+      const response = await axios.put(`/api/alert/${alertData.id}`, alertData);
+      setUserAlerts(userAlerts.map(a => a.id === alertData.id ? response.data : a));
+      setEditingAlert(null);
+      setShowAlerts(false);
+    } catch (err) {
+      console.error('Failed to update alert:', err);
+    }
+  };
+
+  const handleToggleAlert = async (id, active) => {
+    try {
+      await axios.patch(`/api/alert/${id}/toggle`, { active });
+      setUserAlerts(userAlerts.map(a => a.id === id ? {...a, active} : a));
+    } catch (err) {
+      console.error('Failed to toggle alert:', err);
     }
   };
 
@@ -358,26 +402,33 @@ export default function Home() {
 
       {showAlerts && (
         <AlertsPanel>
-          <AlertConfig onSave={handleCreateAlert} />
+          <AlertConfig 
+            onSave={editingAlert ? handleUpdateAlert : handleCreateAlert} 
+            onCancel={() => {
+              setEditingAlert(null);
+              setShowAlerts(false);
+            }}
+            initialData={editingAlert}
+          />
           
           {userAlerts.length > 0 && (
             <AlertsList>
-              <AlertsTitle>Your Active Alerts</AlertsTitle>
-              <div>
+              <AlertsTitle>Your Alerts</AlertsTitle>
+              <AlertStats>
+                <span>Active: {userAlerts.filter(a => a.active).length}</span>
+                <span>Total: {userAlerts.length}</span>
+              </AlertStats>
+              <AlertGrid>
                 {userAlerts.map(alert => (
-                  <AlertItem key={alert.id}>
-                    <AlertInfo>
-                      <AlertName>{alert.name}</AlertName>
-                      <AlertDetails>
-                        {alert.token} price {alert.condition} ${alert.value} on {alert.chain.split('/')[0]}
-                      </AlertDetails>
-                    </AlertInfo>
-                    <DeleteButton onClick={() => handleDeleteAlert(alert.id)}>
-                      Delete
-                    </DeleteButton>
-                  </AlertItem>
+                  <AlertCard
+                    key={alert.id}
+                    alert={alert}
+                    onEdit={handleEditAlert}
+                    onDelete={handleDeleteAlert}
+                    onToggle={handleToggleAlert}
+                  />
                 ))}
-              </div>
+              </AlertGrid>
             </AlertsList>
           )}
         </AlertsPanel>

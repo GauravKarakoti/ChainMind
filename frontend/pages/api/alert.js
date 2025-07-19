@@ -7,6 +7,7 @@ export default async function handler(req, res) {
 
   try {
     // Handle different HTTP methods
+    const { alertId } = req.query;
     switch (method) {
       case 'GET':
         // Fetch user alerts
@@ -33,15 +34,21 @@ export default async function handler(req, res) {
 
       case 'DELETE':
         // Delete an alert
-        const { alertId } = req.query;
         if (!alertId) {
           return res.status(400).json({ error: 'Missing alert ID' });
         }
         await axios.delete(`${backendBaseUrl}/api/alerts/${alertId}`);
         return res.status(204).end();
 
+      case 'PATCH':
+        if (!alertId) {
+          return res.status(400).json({ error: 'Missing alert ID' });
+        }
+        await axios.patch(`${backendBaseUrl}/api/alerts/${alertId}/toggle`,{ active });
+        return res.status(204).end();
+
       default:
-        res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
+        res.setHeader('Allow', ['GET', 'POST', 'DELETE','PATCH']);
         return res.status(405).end(`Method ${method} Not Allowed`);
     }
   } catch (error) {
