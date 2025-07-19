@@ -4,7 +4,7 @@ const { db } = require('../utils/db');
 
 // Create alert
 router.post('/', async (req, res) => {
-  const { name, type, chain, token, chatID, condition, value, frequency, cooldown, custom_message, userId} = req.body;
+  const { name, type, chain, token, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, userId} = req.body;
   
   if (!name || !type || !chain || !token || !chatID || !condition || !value || !frequency || !userId) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -13,13 +13,13 @@ router.post('/', async (req, res) => {
   try {
     const stmt = db.prepare(`
       INSERT INTO alerts 
-      (name, type, chain, token, chatID, condition, value, frequency, cooldown, custom_message, user_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (name, type, chain, token, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     const info = await new Promise((resolve, reject) => {
       stmt.run(
-        name, type, chain, token, chatID, condition, parseFloat(value), frequency, cooldown, custom_message, userId,
+        name, type, chain, token, chatID, condition, parseFloat(value), frequency, cooldown, custom_message, createdAt, lastTriggered, userId,
         function(err) {
           if (err) reject(err);
           else resolve(this);
@@ -39,9 +39,10 @@ router.post('/', async (req, res) => {
       frequency,
       cooldown: 5, // Default cooldown in minutes
       custom_message: null,
+      createdAt: new Date().toISOString(),
+      lastTriggered: null,
       userId,
       is_active: true,
-      created_at: new Date().toISOString()
     };
     
     res.status(201).json(newAlert);
@@ -77,11 +78,12 @@ router.get('/user/:userId', async (req, res) => {
       condition: alert.condition,
       value: alert.value,
       frequency: alert.frequency,
-      userId: alert.user_id,
       cooldown: alert.cooldown,
       custom_message: alert.custom_message,
+      createdAt: alert.createdAt,
+      lastTriggered: alert.lastTriggered,
+      userId: alert.user_id,
       is_active: Boolean(alert.is_active),
-      created_at: alert.created_at
     }));
     
     res.json(formattedAlerts);
@@ -127,12 +129,24 @@ router.patch('/:id/toggle', async (req, res) => {
     });
     console.log(`Alert ${id} toggled to ${active}`);
 
+    await new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE alerts SET lastTriggered = ? WHERE id = ?',
+        [new Date().toISOString().slice(0,10), id],
+        function(err) {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+
     const updatedAlert = await new Promise((resolve, reject) => {
       db.get('SELECT * FROM alerts WHERE id = ?', [id], (err, row) => {
         if (err) reject(err);
         else resolve(row);
       });
     });
+    console.log('Updated alert:', updatedAlert);
     
     res.status(200).json(formatAlert(updatedAlert));
   } catch (err) {
@@ -149,7 +163,7 @@ router.put('/:id', async (req, res) => {
       UPDATE alerts 
       SET name = ?, type = ?, chain = ?, token = ?, chatID = ?, 
           condition = ?, value = ?, frequency = ?, 
-          cooldown = ?, custom_message = ?, is_active = ?
+          cooldown = ?, custom_message = ?, createdAt = ?, lastTriggered = ?, is_active = ?
       WHERE id = ?
     `);
     
@@ -165,11 +179,24 @@ router.put('/:id', async (req, res) => {
         updateData.frequency,
         updateData.cooldown,
         updateData.custom_message,
+        updateData.createdAt || new Date().toISOString(),
+        updateData.lastTriggered || null,
         updateData.active,
         id,
         function(err) {
           if (err) reject(err);
           else resolve(this);
+        }
+      );
+    });
+
+    await new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE alerts SET lastTriggered = ? WHERE id = ?',
+        [new Date().toISOString().slice(0,10), id],
+        function(err) {
+          if (err) reject(err);
+          else resolve();
         }
       );
     });
@@ -204,7 +231,7 @@ function formatAlert(dbAlert) {
     active: Boolean(dbAlert.is_active),
     cooldown: dbAlert.cooldown,
     custom_message: dbAlert.custom_message,
-    createdAt: dbAlert.created_at,
+    createdAt: dbAlert.createdAt,
     lastTriggered: dbAlert.last_triggered
   };
 }

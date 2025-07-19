@@ -34,7 +34,7 @@ function initializeDatabase() {
         alert_type TEXT,
         message_id TEXT,
         error TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -45,7 +45,7 @@ function initializeDatabase() {
         event_type TEXT NOT NULL,
         data TEXT NOT NULL,
         processed BOOLEAN DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -57,7 +57,7 @@ function initializeDatabase() {
         params TEXT NOT NULL,
         response TEXT NOT NULL,
         expires_at DATETIME NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -69,7 +69,7 @@ function initializeDatabase() {
         response TEXT,
         error TEXT,
         user_ip TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -104,9 +104,10 @@ function initializeDatabase() {
         frequency TEXT NOT NULL,
         cooldown INTEGER DEFAULT 5,
         custom_message TEXT,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        lastTriggered DATETIME,
         user_id TEXT NOT NULL,
-        is_active BOOLEAN DEFAULT 1,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        is_active BOOLEAN DEFAULT 1
       )
       `, (err) => {
         if (err) console.error('Error creating alerts table:', err.message);
@@ -122,7 +123,7 @@ function initializeDatabase() {
         token TEXT,
         price REAL,
         error TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -204,7 +205,7 @@ function getApiCache(endpoint, params) {
       WHERE endpoint = ? 
         AND params = ? 
         AND expires_at > datetime('now')
-      ORDER BY created_at DESC
+      ORDER BY createdAt DESC
       LIMIT 1
     `, [endpoint, paramsString], (err, row) => {
       if (err) return reject(err);
@@ -287,9 +288,9 @@ function logQuery(query, response = null, userIp = null, error = null, api = nul
 function getRecentQueries(limit = 10) {
   return new Promise((resolve, reject) => {
     db.all(`
-      SELECT id, query, created_at 
+      SELECT id, query, createdAt 
       FROM query_history 
-      ORDER BY created_at DESC 
+      ORDER BY createdAt DESC 
       LIMIT ?
     `, [limit], (err, rows) => {
       if (err) return reject(err);

@@ -1,12 +1,27 @@
 import { Bell, Zap, Activity, X, ToggleLeft, ToggleRight, DollarSign } from 'lucide-react';
 import styles from './AlertCard.module.css';
 
+// Add this function to format dates
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  
+  // Format as "MM/DD/YYYY, HH:MM AM/PM"
+  return date.toLocaleString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+}
+
 export default function AlertCard({ alert, onEdit, onDelete, onToggle }) {
   const icons = {
     price: <DollarSign size={16} />,
     gas: <Zap size={16} />,
     whale: <Activity size={16} />,
-    activity: <div>A</div>
+    activity: <div className={styles.activityIcon}>A</div>
   };
 
   return (
@@ -58,7 +73,7 @@ export default function AlertCard({ alert, onEdit, onDelete, onToggle }) {
           </span>
         </div>
         <div className={styles.lastTriggered}>
-          {alert.lastTriggered ? `Last triggered: ${formatDate(alert.lastTriggered)}` : 'Never triggered'}
+          {alert.lastTriggered ? `Last triggered: ${formatDate(alert.lastTriggered)}` : formatDate(new Date().toISOString().slice(0, 10))}
         </div>
       </div>
     </div>

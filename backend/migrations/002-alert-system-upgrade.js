@@ -14,7 +14,7 @@ db.serialize(() => {
         parameters TEXT,
         value TEXT,
         status TEXT DEFAULT 'pending',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )`)
 });
 
