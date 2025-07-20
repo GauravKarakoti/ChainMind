@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { X, Check, ChevronDown, Bell, Zap, Activity, DollarSign } from 'lucide-react';
+import axios from 'axios';
 import styles from './AlertConfig.module.css';
 
 export default function AlertConfig({ onSave, onCancel, initialData }) {
   const [alertType, setAlertType] = useState('price');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [tokenSuggestions, setTokenSuggestions] = useState([]);
+  const [loadingTokens, setLoadingTokens] = useState(false);
   
   const [alert, setAlert] = useState({
     id: initialData?.id || null,
@@ -24,10 +26,17 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
 
   useEffect(() => {
     const fetchTokens = async () => {
-      const response = await fetch('/api/tokens');
-      const data = await response.json();
-      setTokenSuggestions(data.slice(0, 10));
+      setLoadingTokens(true);
+      try {
+        const response = await axios.get('/api/tokens');
+        setTokenSuggestions(response.data.slice(0, 10));
+      } catch (error) {
+        console.error('Failed to fetch tokens:', error);
+      } finally {
+        setLoadingTokens(false);
+      }
     };
+    
     fetchTokens();
   }, []);
 
@@ -135,7 +144,11 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 placeholder={alertType === 'gas' ? "Gas price" : "ETH, USDT, BTC..."}
                 required
               />
-              {tokenSuggestions.length > 0 && (
+              {loadingTokens ? (
+                <div className={styles.suggestions}>
+                  <div className={styles.suggestionItem}>Loading tokens...</div>
+                </div>
+              ) : tokenSuggestions.length > 0 ? (
                 <div className={styles.suggestions}>
                   {tokenSuggestions.map(token => (
                     <div 
@@ -143,12 +156,19 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                       className={styles.suggestionItem}
                       onClick={() => setAlert({...alert, token: token.symbol})}
                     >
-                      <img src={token.logo} alt={token.symbol} className={styles.tokenLogo} />
+                      {token.logo && (
+                        <img 
+                          src={token.logo} 
+                          alt={token.symbol} 
+                          className={styles.tokenLogo} 
+                          onError={(e) => e.target.style.display = 'none'}
+                        />
+                      )}
                       {token.symbol}
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
           
@@ -295,7 +315,7 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
           </button>
           <button type="submit" className={styles.submitButton}>
             <Check size={16} className={styles.buttonIcon} />
-            Create Alert
+            {initialData ? 'Update Alert' : 'Create Alert'}
           </button>
         </div>
       </form>

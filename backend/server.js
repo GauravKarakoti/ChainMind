@@ -30,6 +30,9 @@ require('./workers/alertWorker'); // Start alert worker
 
 app.use('/api/alerts', alertRouter);
 
+const tokensRouter = require('./routes/tokens');
+app.use('/api/tokens', tokensRouter);
+
 app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`);
 });
