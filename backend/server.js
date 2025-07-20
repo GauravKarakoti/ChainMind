@@ -22,6 +22,9 @@ app.use('/api/logger', loggerRouter);
 const aiRouter = require('./routes/ai');
 app.use('/api/ai', aiRouter);
 
+const authRouter = require('./routes/auth');
+app.use('/api/auth', authRouter);
+
 const alertRouter = require('./routes/alerts');
 require('./workers/alertWorker'); // Start alert worker
 

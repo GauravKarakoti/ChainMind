@@ -1,12 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../utils/db');
+const auth = require('../middleware/auth');
 
 // Create alert
-router.post('/', async (req, res) => {
-  const { name, type, chain, token, accountAddress, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, userId} = req.body;
+router.post('/', auth, async (req, res) => {
+  const { name, type, chain, token, accountAddress, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered } = req.body;  
+  const userId = req.user.id;
+
+  // Fetch user to get telegram_chat_id
+  const user = await new Promise((resolve, reject) => {
+    db.get('SELECT * FROM users WHERE id = ?', [userId], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+
+  const chatId = user.telegram_chat_id;
   
-  if (!name || !type || !chain || !token || !chatID || !condition || !value || !frequency || !userId) {
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (!name || !type || !chain || !token || !chatID || !condition || !value || !frequency) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -34,7 +50,7 @@ router.post('/', async (req, res) => {
       chain,
       token,
       accountAddress,
-      chatID,
+      chatId,
       condition,
       value: parseFloat(value),
       frequency,
@@ -54,12 +70,12 @@ router.post('/', async (req, res) => {
 });
 
 // Get user alerts
-router.get('/user/:userId', async (req, res) => {
+router.get('/user', auth, async (req, res) => {
   try {
     const alerts = await new Promise((resolve, reject) => {
       db.all(
         'SELECT * FROM alerts WHERE user_id = ?',
-        [req.params.userId],
+        [req.user.id],
         (err, rows) => {
           if (err) {
             console.log(err);

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import Dashboard from '../components/Dashboard';
 import AlertConfig from '../components/AlertConfig';
@@ -6,6 +7,7 @@ import axios from 'axios';
 import { HelpCircle, Bell } from 'lucide-react';
 import GeneralResponse from '../components/GeneralResponse';
 import AlertCard from '../components/AlertCard';
+import LogoutButton from '../components/LogoutButton';
 
 const EXAMPLE_QUERIES = [
   "Show my token transfers on 0x...",
@@ -267,6 +269,8 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [userAlerts, setUserAlerts] = useState([]);
   const [editingAlert, setEditingAlert] = useState(null);
+  const [user, setUser] = useState(null);
+  const router = useRouter();
 
   const handleEditAlert = (alert) => {
     setEditingAlert(alert);
@@ -291,7 +295,7 @@ export default function Home() {
 
   const handleCreateAlert = async (alertData) => {
     try {
-      const userId = "user-123"; // Should come from auth system
+      const userId = user;
       const response = await axios.post('/api/alert', {
         ...alertData,
         userId
@@ -342,17 +346,28 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      router.push('/register');
+    }
+    
     const fetchUserAlerts = async () => {
       try {
-        const userId = "user-123"; // Should come from auth system
+        const userId = user; // Should come from auth system
         const response = await axios.get(`/api/alert?userId=${userId}`);
         setUserAlerts(response.data);
       } catch (err) {
         console.error('Failed to fetch alerts:', err);
       }
     };
-    
-    fetchUserAlerts();
+
+    if (user) {
+      fetchUserAlerts();
+    } else {
+      router.push('/register');
+    }
   }, []);
 
   return (
@@ -361,7 +376,7 @@ export default function Home() {
         <HeaderTitle>ChainMind Analytics</HeaderTitle>
         <HeaderButtonGroup>
           <HeaderButton 
-            primary 
+            primary="true"
             onClick={() => setShowAlerts(!showAlerts)}
           >
             <Bell size={16} />
@@ -371,6 +386,7 @@ export default function Home() {
             <HelpCircle size={16} />
             Examples
           </HeaderButton>
+          <LogoutButton />
         </HeaderButtonGroup>
       </Header>
       

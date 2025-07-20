@@ -13,7 +13,6 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
     type: 'price',
     chain: 'ethereum/mainnet',
     token: '',
-    chatID: '',
     condition: 'above',
     value: 0,
     frequency: 'recurring',
@@ -151,18 +150,6 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Telegram Chat ID</label>
-            <input
-              type="text"
-              value={alert.chatID}
-              onChange={(e) => setAlert({...alert, chatID: e.target.value})}
-              className={styles.input}
-              placeholder="Use @RawDataBot to get it"
-              required
-            />
           </div>
           
           <div className={styles.formGroup}>
