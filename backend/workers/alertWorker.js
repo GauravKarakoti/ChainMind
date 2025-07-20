@@ -97,7 +97,7 @@ async function checkGasAlerts() {
     if ((alert.condition === 'above' && ethGasPrice > alert.value) ||
         (alert.condition === 'below' && ethGasPrice < alert.value)) {
       const message = `Gas price alert: ${ethGasPrice} gwei (${alert.condition} ${alert.value})`;
-      await sendNotifications(alert, message);
+      await sendNotifications(alert, message, ethGasPrice);
       lastTriggered.set(alert.id, now);
           
       if (alert.frequency === 'once') {
@@ -119,10 +119,10 @@ async function checkWhaleAlerts() {
     if (now - lastTriggerTime < cooldownMs) continue;
     if (!alert.is_active) continue;
 
-    const largeTransfers = await fetchLargeTransfers(alert.chain, alert.token, alert.value);
+    const largeTransfers = await fetchLargeTransfers(alert.chain, alert.token, alert.value, alert.thresholdType);
     if (largeTransfers.length > 0) {
       const message = `Whale alert: ${largeTransfers.length} large transfers detected`;
-      await sendNotifications(alert, message);
+      await sendNotifications(alert, message, largeTransfers);
       lastTriggered.set(alert.id, now);
           
       if (alert.frequency === 'once') {
@@ -145,9 +145,10 @@ async function checkAccountActivityAlerts() {
     if (!alert.is_active) continue;
 
     const activity = await fetchAccountActivity(alert.chain, alert.accountAddress);
-    if (activity > alert.value) {
-      const message = `Account activity alert: ${activity} transactions (${alert.condition} ${alert.value})`;
-      await sendNotifications(alert, message);
+    if ((alert.condition === 'above' && activity > alert.value) ||
+        (alert.condition === 'below' && activity < alert.value)) {
+      const message = `📈 Account activity: ${activity} transactions`;
+      await sendNotifications(alert, message, activity);
       lastTriggered.set(alert.id, now);
           
       if (alert.frequency === 'once') {

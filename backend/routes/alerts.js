@@ -4,7 +4,7 @@ const { db } = require('../utils/db');
 
 // Create alert
 router.post('/', async (req, res) => {
-  const { name, type, chain, token, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, userId} = req.body;
+  const { name, type, chain, token, accountAddress, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, userId} = req.body;
   
   if (!name || !type || !chain || !token || !chatID || !condition || !value || !frequency || !userId) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -13,13 +13,13 @@ router.post('/', async (req, res) => {
   try {
     const stmt = db.prepare(`
       INSERT INTO alerts 
-      (name, type, chain, token, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, user_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (name, type, chain, token, accountAddress, chatID, condition, value, frequency, cooldown, custom_message, createdAt, lastTriggered, user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     const info = await new Promise((resolve, reject) => {
       stmt.run(
-        name, type, chain, token, chatID, condition, parseFloat(value), frequency, cooldown, custom_message, createdAt, lastTriggered, userId,
+        name, type, chain, token, accountAddress, chatID, condition, parseFloat(value), frequency, cooldown, custom_message, createdAt, lastTriggered, userId,
         function(err) {
           if (err) reject(err);
           else resolve(this);
@@ -33,6 +33,7 @@ router.post('/', async (req, res) => {
       type,
       chain,
       token,
+      accountAddress,
       chatID,
       condition,
       value: parseFloat(value),
@@ -74,6 +75,7 @@ router.get('/user/:userId', async (req, res) => {
       type: alert.type,
       chain: alert.chain,
       token: alert.token,
+      address: alert.accountAddress,
       chatID: alert.chatID,
       condition: alert.condition,
       value: alert.value,
@@ -162,7 +164,7 @@ router.put('/:id', async (req, res) => {
   try {
     const stmt = db.prepare(`
       UPDATE alerts 
-      SET name = ?, type = ?, chain = ?, token = ?, chatID = ?, 
+      SET name = ?, type = ?, chain = ?, token = ?, accountAddress = ?, chatID = ?, 
           condition = ?, value = ?, frequency = ?, 
           cooldown = ?, custom_message = ?, createdAt = ?, lastTriggered = ?, is_active = ?
       WHERE id = ?
@@ -175,6 +177,7 @@ router.put('/:id', async (req, res) => {
         updateData.type,
         updateData.chain,
         updateData.token,
+        updateData.accountAddress,
         updateData.chatID,
         updateData.condition,
         updateData.value,
@@ -228,6 +231,7 @@ function formatAlert(dbAlert) {
     type: dbAlert.type,
     chain: dbAlert.chain,
     token: dbAlert.token,
+    accountAddress: dbAlert.accountAddress,
     chatID: dbAlert.chatID,
     condition: dbAlert.condition,
     value: dbAlert.value,

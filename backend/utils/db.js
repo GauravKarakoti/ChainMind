@@ -98,6 +98,7 @@ function initializeDatabase() {
         type TEXT NOT NULL,
         chain TEXT NOT NULL,
         token TEXT NOT NULL,
+        accountAddress TEXT,
         chatID TEXT NOT NULL,
         condition TEXT NOT NULL,
         value REAL NOT NULL,

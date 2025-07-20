@@ -45,8 +45,13 @@ export default function AlertCard({ alert, onEdit, onDelete, onToggle }) {
         <div className={styles.detailItem}>
           <span className={styles.detailLabel}>Condition:</span>
           <span className={styles.detailValue}>
-            {alert.token} {alert.condition} {alert.value}
-            {alert.type === 'gas' ? ' gwei' : alert.type === 'whale' ? (alert.thresholdType === 'value' ? ' USD' : '%') : ''}
+            {alert.type === 'account-activity' ? (
+              `Account activity ${alert.condition} ${alert.value} transactions`
+            ) : alert.type === 'whale' ? (
+              `Whale movements ${alert.condition} ${alert.value}${alert.thresholdType === 'value' ? ' USD' : '%'}`
+            ) : (
+              `${alert.token} ${alert.condition} ${alert.value}${alert.type === 'gas' ? ' gwei' : ''}`
+            )}
           </span>
         </div>
         

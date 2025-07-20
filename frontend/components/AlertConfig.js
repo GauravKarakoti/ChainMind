@@ -86,7 +86,7 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 {id: 'price', label: 'Price', icon: <DollarSign size={16} />},
                 {id: 'gas', label: 'Gas', icon: <Zap size={16} />},
                 {id: 'whale', label: 'Whale', icon: <Activity size={16} />},
-                {id: 'activity', label: 'Activity', icon: <div className={styles.iconPlaceholder}>A</div>}
+                {id: 'account-activity', label: 'Activity', icon: <div className={styles.iconPlaceholder}>A</div>}
               ].map((type) => (
                 <button
                   key={type.id}
@@ -216,7 +216,7 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
             </div>
           )}
 
-          {alert.type === 'whale' && (
+          {alertType === 'whale' && (
             <>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Threshold Type</label>
@@ -239,6 +239,20 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 />
               </div>
             </>
+          )}
+
+          {alertType === 'account-activity' && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Account Address</label>
+              <input
+                type="text"
+                value={alert.accountAddress}
+                onChange={e => setAlert({...alert, accountAddress: e.target.value})}
+                className={styles.input}
+                placeholder="Enter blockchain address"
+                required
+              />
+            </div>
           )}
 
           <div className={styles.advancedToggle} onClick={() => setShowAdvanced(!showAdvanced)}>

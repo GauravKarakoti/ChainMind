@@ -90,24 +90,18 @@ async function fetchLargeTransfers(chain, token, threshold) {
       [query, variables] = buildGenericQuery(network, tokenAddress, threshold);
     }
 
-    let data = JSON.stringify({query,variables});
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: 'https://streaming.bitquery.io/eap',
-      headers: { 
+    const response = await axios.post(
+      'https://streaming.bitquery.io/eap',
+      { query, variables },
+      {
+        headers: { 
           'Content-Type': 'application/json', 
           'Authorization': `Bearer ${BITQUERY_API_KEY}`
-      },
-      data : data
-    };
-
-    axios.request(config).then((response) => {
-      return processBitqueryResponse(response.data, network);
-    }).catch((error) => {
-      console.log(error);
-    });
-    return [];
+        }
+      }
+    );
+    
+    return processBitqueryResponse(response.data, network);
   } catch (error) {
     console.error('Failed to fetch large transfers:', error);
     return [];
@@ -252,35 +246,68 @@ function processBitqueryResponse(data, network) {
 // Improved fetchAccountActivity using Alchemy
 async function fetchAccountActivity(chain, accountAddress) {
   try {
-    // Map chain to Alchemy network
-    const networkMap = {
-      'ethereum/mainnet': 'eth-mainnet',
-      'polygon/mainnet': 'polygon-mainnet',
-      'arbitrum/mainnet': 'arb-mainnet',
-      'optimism/mainnet': 'opt-mainnet'
-    };
+    const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    let url, body, headers = { 'X-API-KEY': process.env.NODIT_API_KEY };
     
-    const network = networkMap[chain];
-    if (!network) {
-      // Fallback to Nodit API
-      return fallbackAccountActivity(chain, accountAddress);
+    const noditClient = axios.create({
+      baseURL: 'https://web3.nodit.io/v1/',
+      headers: { 'X-API-KEY': process.env.NODIT_API_KEY },
+      timeout: 10000
+    });
+    
+    switch (chain.split('/')[0]) {
+      case 'ethereum':
+          url = 'ethereum/mainnet/token/getTokenTransfersByAccount';
+          body = { 
+            accountAddress: accountAddress,
+            fromDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            toDate: new Date().toISOString(),
+            page: 1,  // Add pagination
+            limit: 20
+          };
+          break;
+  
+      case 'xrpl':
+        url = `xrpl/mainnet/blockchain/getTransactionsByAccount`;
+        body = {
+          accountAddress: accountAddress,
+        };
+        break;
+
+      case 'tron':
+        url = `tron/mainnet/blockchain/getTransactionsByAccount`;
+        body = {
+          accountAddress: accountAddress,
+        };
+        break;
+      
+      case 'bitcoin':
+        url = `bitcoin/mainnet/blockchain/getTransactionsByAccount`;
+        body = {
+          accountAddress: accountAddress,
+        };
+        break;
+
+      case 'dogecoin':
+        url = `dogecoin/mainnet/blockchain/getTransactionsByAccount`;
+        body = {
+          accountAddress: accountAddress,
+        };
+        break;
+      
+      default:
+        return res.status(400).json({ error: 'Unsupported blockchain' });
     }
 
-    const response = await axios.post(
-      `https://${network}.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-      {
-        jsonrpc: '2.0',
-        method: 'alchemy_getAssetTransfers',
-        params: [{
-          fromBlock: '0x' + (Math.floor(Date.now() / 1000) - 86400).toString(16), // Last 24 hours
-          toAddress: accountAddress,
-          category: ['external', 'internal', 'erc20', 'erc721', 'erc1155']
-        }],
-        id: 1
-      }
-    );
+    console.log(url,body,{headers});
 
-    return response.data.result.transfers.length || 0;
+    const response = await noditClient.post(url, body);
+    const result = response.data;
+
+    return result.items.filter(tx => 
+      new Date(tx.timestamp || tx.blockTimestamp) > new Date(startTime)
+    ).length;
   } catch (error) {
     console.error('Failed to fetch account activity with Alchemy:', error);
     return fallbackAccountActivity(chain, accountAddress);

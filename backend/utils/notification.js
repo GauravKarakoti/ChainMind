@@ -61,6 +61,16 @@ async function sendNotifications(alert, message, value) {
     case 'gas':
       formattedMessage = formatGasAlert(alert, value);
       break;
+    case 'whale':
+      formattedMessage = message;
+      formattedMessage += `\n\nTop transfers:\n${value.slice(0,3).map(t => 
+        `- ${t.amount} ${t.currency} (${t.from.slice(0,6)}... → ${t.to.slice(0,6)}...)`
+      ).join('\n')}`;
+      break;
+    case 'account-activity':
+      formattedMessage = message
+      formattedMessage += ` in the last 24 hours`;
+      break;
     default:
       formattedMessage = message;
   }
