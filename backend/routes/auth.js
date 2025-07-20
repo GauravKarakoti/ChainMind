@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(300).json({ error: 'User already exists' });
+      return res.status(400).json({ error: 'User already exists' });
     }
 
     // Hash password
@@ -85,7 +85,7 @@ router.post('/login', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Check password

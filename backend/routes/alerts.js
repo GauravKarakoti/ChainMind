@@ -16,7 +16,7 @@ router.post('/', auth, async (req, res) => {
     });
   });
 
-  const chatId = user.telegram_chat_id;
+  const chatID = user.telegram_chat_id;
   
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
@@ -50,7 +50,7 @@ router.post('/', auth, async (req, res) => {
       chain,
       token,
       accountAddress,
-      chatId,
+      chatID,
       condition,
       value: parseFloat(value),
       frequency,

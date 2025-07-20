@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import axios from 'axios';
+import Link from 'next/link';
 
 const Container = styled.div`
   max-width: 400px;
@@ -49,6 +50,23 @@ const Error = styled.div`
   text-align: center;
 `;
 
+const RegisterPrompt = styled.div`
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #64748b;
+`;
+
+const RegisterLink = styled.a`
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,20 +79,18 @@ export default function Login() {
       const response = await axios.post(
         '/api/auth?action=login', 
         { email, password }
-      )
+      );
       
-      const data = response.data;
-      
-      if (response.status === 200) {
-        localStorage.setItem('token', data.token);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify({
-          id: data.id,
-          email: data.email,
-          telegram_chat_id: data.telegram_chat_id
+            id: response.data.id,
+            email: response.data.email,
+            telegram_chat_id: response.data.telegram_chat_id
         }));
         router.push('/');
       } else {
-        setError(data.error || 'Login failed');
+        setError(response.data.error || 'Login failed');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred');
@@ -101,6 +117,13 @@ export default function Login() {
         />
         <Button type="submit">Login</Button>
         {error && <Error>{error}</Error>}
+        
+        <RegisterPrompt>
+          New user? 
+          <Link href="/register" passHref>
+            <RegisterLink> Create an account</RegisterLink>
+          </Link>
+        </RegisterPrompt>
       </form>
     </Container>
   );

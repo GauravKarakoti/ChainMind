@@ -3,8 +3,9 @@ import axios from 'axios';
 export default async function handler(req, res) {
   const backendBaseUrl = process.env.URL;
   const { method } = req;
-  const { userId, alertId } = req.query;
+  const { alertId } = req.query;
   const { active, updateData } = req.body;
+  const token = req.headers['x-auth-token'];
   console.log('updated alert data:', updateData);
 
   try {
@@ -12,24 +13,19 @@ export default async function handler(req, res) {
     switch (method) {
       case 'GET':
         // Fetch user alerts
-        if (!userId) {
-          return res.status(400).json({ error: 'Missing user ID' });
-        }
-        console.log(`${backendBaseUrl}/api/alerts/user/${userId}`)
         const alertsResponse = await axios.get(
-          `${backendBaseUrl}/api/alerts/user/${userId}`
+          `${backendBaseUrl}/api/alerts/user`,
+          { headers: { 'x-auth-token': token } } // Pass token
         );
         return res.status(200).json(alertsResponse.data);
 
       case 'POST':
         // Create new alert
         const newAlert = req.body;
-        if (!newAlert.userId) {
-          return res.status(400).json({ error: 'Missing user ID in alert data' });
-        }
         const createResponse = await axios.post(
           `${backendBaseUrl}/api/alerts`,
-          newAlert
+          newAlert,
+          { headers: { 'x-auth-token': token } } // Pass token
         );
         return res.status(201).json(createResponse.data);
 
@@ -38,21 +34,27 @@ export default async function handler(req, res) {
         if (!alertId) {
           return res.status(400).json({ error: 'Missing alert ID' });
         }
-        await axios.delete(`${backendBaseUrl}/api/alerts/${alertId}`);
+        await axios.delete(`${backendBaseUrl}/api/alerts/${alertId}`, {
+          headers: { 'x-auth-token': token } // Pass token
+        });
         return res.status(204).end();
 
       case 'PATCH':
         if (!alertId) {
           return res.status(400).json({ error: 'Missing alert ID' });
         }
-        await axios.patch(`${backendBaseUrl}/api/alerts/${alertId}/toggle`, { active });
+        await axios.patch(`${backendBaseUrl}/api/alerts/${alertId}/toggle`, { active },{
+          headers: { 'x-auth-token': token } // Pass token
+        });
         return res.status(204).end();
 
       case 'PUT':
         if (!alertId) {
           return res.status(400).json({ error: 'Missing alert ID' });
         }
-        await axios.put(`${backendBaseUrl}/api/alerts/${alertId}`, { updateData });
+        await axios.put(`${backendBaseUrl}/api/alerts/${alertId}`, { updateData },{
+          headers: { 'x-auth-token': token } // Pass token
+        });
         return res.status(204).end();
 
       default:

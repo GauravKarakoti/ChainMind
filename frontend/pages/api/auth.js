@@ -36,11 +36,8 @@ export default async function handler(req, res) {
     
     // Handle different error statuses
     const status = error.response?.status || 500;
-    const message = error.response?.data?.error || 'Failed to process authentication request';
+    const data = error.response?.data || { error: 'Authentication failed' };
     
-    return res.status(status).json({
-      error: message,
-      details: error.response?.data?.details || error.message
-    });
+    return res.status(status).json(data);
   }
 }

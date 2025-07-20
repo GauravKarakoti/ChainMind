@@ -270,6 +270,7 @@ export default function Home() {
   const [userAlerts, setUserAlerts] = useState([]);
   const [editingAlert, setEditingAlert] = useState(null);
   const [user, setUser] = useState(null);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   const handleEditAlert = (alert) => {
@@ -279,11 +280,14 @@ export default function Home() {
 
   const handleAsk = async () => {
     if (!query.trim()) return;
+    const token = localStorage.getItem('token');
     
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.post('/api/ask', { query });
+      const res = await axios.post('/api/ask', { query }, {
+        headers: { 'x-auth-token': token }
+      });
       setResponse(res.data);
     } catch (err) {
       setError('Failed to get response. Please try again.');
@@ -295,10 +299,9 @@ export default function Home() {
 
   const handleCreateAlert = async (alertData) => {
     try {
-      const userId = user;
-      const response = await axios.post('/api/alert', {
-        ...alertData,
-        userId
+      const token = localStorage.getItem('token');
+      const response = await axios.post('/api/alert', alertData, {
+        headers: { 'x-auth-token': token }
       });
       
       setUserAlerts([...userAlerts, response.data]);
@@ -312,7 +315,10 @@ export default function Home() {
 
   const handleDeleteAlert = async (id) => {
     try {
-      await axios.delete(`/api/alert?alertId=${id}`);
+      const token = localStorage.getItem('token');
+      await axios.delete(`/api/alert?alertId=${id}`, {
+        headers: { 'x-auth-token': token }
+      });
       setUserAlerts(userAlerts.filter(alert => alert.id !== id));
     } catch (err) {
       console.error('Failed to delete alert:', err);
@@ -323,10 +329,13 @@ export default function Home() {
   const handleUpdateAlert = async (alertData) => {
     try {
       const id = editingAlert.id;
+      const token = localStorage.getItem('token');
       console.log('Updating alert:', id, alertData);
       const response = await axios.put(`/api/alert?alertId=${id}`, { 
         updateData: alertData,
         id
+      },{
+        headers: { 'x-auth-token': token }
       });
       setUserAlerts(userAlerts.map(a => a.id === alertData.id ? response.data : a));
       setEditingAlert(null);
@@ -338,7 +347,10 @@ export default function Home() {
 
   const handleToggleAlert = async (id, active) => {
     try {
-      await axios.patch(`/api/alert?alertId=${id}`, { active });
+      const token = localStorage.getItem('token');
+      await axios.patch(`/api/alert?alertId=${id}`, { active },{
+        headers: { 'x-auth-token': token }
+      });
       setUserAlerts(userAlerts.map(a => a.id === id ? {...a, active} : a));
     } catch (err) {
       console.error('Failed to toggle alert:', err);
@@ -346,29 +358,41 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Set flag to indicate we're on the client side
+    setIsClient(true);
+    
+    // Only run on client side
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const token = localStorage.getItem('token');
+    
+    if (storedUser && token) {
       setUser(JSON.parse(storedUser));
     } else {
+      console.warn('No user found, redirecting to register');
       router.push('/register');
     }
-    
+  }, []);
+
+  useEffect(() => { 
+    if (!user) return;
+
     const fetchUserAlerts = async () => {
       try {
-        const userId = user; // Should come from auth system
-        const response = await axios.get(`/api/alert?userId=${userId}`);
+        const response = await axios.get('/api/alert', {
+          headers: { 'x-auth-token': token }
+        });
         setUserAlerts(response.data);
       } catch (err) {
         console.error('Failed to fetch alerts:', err);
       }
     };
 
-    if (user) {
-      fetchUserAlerts();
-    } else {
-      router.push('/register');
-    }
+    fetchUserAlerts();  
   }, []);
+
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Container>
