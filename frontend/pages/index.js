@@ -304,7 +304,15 @@ export default function Home() {
         headers: { 'x-auth-token': token }
       });
       
-      setUserAlerts([...userAlerts, response.data]);
+      setUserAlerts(prev => [
+      ...prev, 
+      {
+        ...response.data,
+        userId: user.id, // Add user ID
+        active: true,
+        address: response.data.accountAddress // Map to expected field
+      }
+    ]);
       setShowAlerts(false);
       alert('Alert created successfully!');
     } catch (err) {
@@ -351,7 +359,9 @@ export default function Home() {
       await axios.patch(`/api/alert?alertId=${id}`, { active },{
         headers: { 'x-auth-token': token }
       });
-      setUserAlerts(userAlerts.map(a => a.id === id ? {...a, active} : a));
+      setUserAlerts(prev => prev.map(a => 
+        a.id === id ? {...a, active} : a
+      ));
     } catch (err) {
       console.error('Failed to toggle alert:', err);
     }
@@ -367,28 +377,24 @@ export default function Home() {
     
     if (storedUser && token) {
       setUser(JSON.parse(storedUser));
+      fetchUserAlerts();
     } else {
       console.warn('No user found, redirecting to register');
       router.push('/register');
     }
   }, []);
 
-  useEffect(() => { 
-    if (!user) return;
-
-    const fetchUserAlerts = async () => {
-      try {
-        const response = await axios.get('/api/alert', {
-          headers: { 'x-auth-token': token }
-        });
-        setUserAlerts(response.data);
-      } catch (err) {
-        console.error('Failed to fetch alerts:', err);
-      }
-    };
-
-    fetchUserAlerts();  
-  }, []);
+  const fetchUserAlerts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/alert', {
+        headers: { 'x-auth-token': token }
+      });
+      setUserAlerts(response.data);
+    } catch (err) {
+      console.error('Failed to fetch alerts:', err);
+    }
+  };
 
   if (!isClient) {
     return <div>Loading...</div>;

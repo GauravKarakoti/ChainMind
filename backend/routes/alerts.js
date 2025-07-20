@@ -59,7 +59,7 @@ router.post('/', auth, async (req, res) => {
       createdAt: new Date().toISOString(),
       lastTriggered: null,
       userId,
-      is_active: true,
+      active: true,
     };
     
     res.status(201).json(newAlert);

@@ -58,7 +58,7 @@ export default function AlertCard({ alert, onEdit, onDelete, onToggle }) {
         <div className={styles.detailItem}>
           <span className={styles.detailLabel}>Chain:</span>
           <span className={styles.detailValue}>
-            {alert.chain.split('/')[0]}
+            {alert.chain?.split('/')[0] || 'Unknown'}
           </span>
         </div>
         
