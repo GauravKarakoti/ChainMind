@@ -1,9 +1,11 @@
 .container {
-  padding: 1.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  background-color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
 }
 
 .title {
@@ -14,58 +16,67 @@
 }
 
 .form {
-  display: flex;
-  flex-direction: column;
+  padding: 24px;
 }
 
 .formGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
 .formGroup {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.formGroupFullWidth {
+  grid-column: span 2;
 }
 
 .label {
-  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 10px;
+  font-size: 15px;
   font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: #374151;
+  color: #333;
 }
 
 .input {
-  width: 100%;
-  padding: 0.625rem 0 0.625rem 0.75rem;
-  margin-right: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  background-color: white;
-  transition: border-color 0.2s;
+  width: 300px;
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #f9f9f9;
+  transition: all 0.2s;
+}
+
+.input2 {
+  width: 600px;
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #f9f9f9;
+  transition: all 0.2s;
 }
 
 .input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: #3a7bd5;
+  box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.1);
 }
 
 .select {
   width: 100%;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  background-color: white;
+  padding: 14px 16px;
+  padding-right: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #f9f9f9;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
+  cursor: pointer;
 }
 
 .select:focus {
@@ -79,27 +90,28 @@
   gap: 0.5rem;
 }
 
+.conditionGroup {
+  display: flex;
+  gap: 12px;
+}
+
 .conditionSelect {
   flex: 1;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  background-color: white;
+  padding: 14px 16px;
+  padding-right: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #f9f9f9;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
 }
 
 .valueInput {
-  flex: 1;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  background-color: white;
+  width: 100px;
+  padding: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
 }
 
 .valueInput:focus {
@@ -109,10 +121,39 @@
 }
 
 .header {
+  background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+  padding: 24px;
+  color: white;
+}
+
+.headerContent {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  gap: 16px;
+}
+
+.headerIcon {
+  background: rgba(255, 255, 255, 0.2);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerText h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: white;
+}
+
+.headerText p {
+  margin: 4px 0 0;
+  font-size: 15px;
+  opacity: 0.9;
+  font-weight: 400;
 }
 
 .closeButton {
@@ -122,27 +163,74 @@
   cursor: pointer;
 }
 
+.closeSuggestions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11;
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.closeSuggestions:hover {
+  background: #f5f5f5;
+}
+
 .typeGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
 
 .typeButton {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  padding: 16px 8px;
   background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .typeButton:hover {
-  border-color: #6366f1;
+  border-color: #3a7bd5;
+}
+
+.typeButtonActive {
+  border-color: #3a7bd5;
+  background: rgba(58, 123, 213, 0.05);
+  box-shadow: 0 0 0 1px #3a7bd5;
+}
+
+.typeIcon {
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.typeIconActive {
+  color: #3a7bd5;
+}
+
+.typeLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+}
+
+.typeLabelActive {
+  color: #3a7bd5;
 }
 
 .typeActive {
@@ -156,10 +244,11 @@
 
 .selectIcon {
   position: absolute;
-  right: 0.75rem;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
+  color: #666;
 }
 
 .tokenInputContainer {
@@ -172,43 +261,66 @@
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   z-index: 10;
   max-height: 200px;
   overflow-y: auto;
+  padding-top: 30px;
 }
 
 .suggestionItem {
-  padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  padding: 12px 16px;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .suggestionItem:hover {
-  background-color: #f1f5f9;
+  background: #f5f5f5;
 }
 
 .tokenLogo {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
   border-radius: 50%;
+}
+
+.unit {
+  font-size: 14px;
+  color: #666;
 }
 
 .advancedToggle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  color: #6366f1;
+  gap: 8px;
+  margin: 24px 0;
+  color: #3a7bd5;
   font-weight: 500;
-  grid-column: span 2;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.advancedToggleText {
+  transition: color 0.2s;
+}
+
+.advancedToggle:hover .advancedToggleText {
+  color: #2a6bc5;
 }
 
 .chevron {
+  color: #3a7bd5;
   transition: transform 0.2s;
+}
+
+.chevronRotated {
+  transform: rotate(180deg);
 }
 
 .rotated {
@@ -216,44 +328,79 @@
 }
 
 .advancedSettings {
-  grid-column: span 2;
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
-  background: #f8fafc;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
 }
 
-.toggleContainer {
+.textarea {
+  width: 600px;
+  min-height: 100px;
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  resize: vertical;
+  background: white;
+}
+
+.toggleLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 12px;
   cursor: pointer;
 }
 
+.toggleContainer {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
 .toggleInput {
-  position: absolute;
   opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .toggle {
-  width: 40px;
-  height: 24px;
-  background: #cbd5e1;
-  border-radius: 12px;
-  position: relative;
-  transition: background 0.2s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
 }
 
 .toggle:before {
-  content: '';
   position: absolute;
-  width: 20px;
-  height: 20px;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
   border-radius: 50%;
-  background: white;
-  top: 2px;
-  left: 2px;
-  transition: transform 0.2s;
+}
+
+.toggleInput:checked + .toggle {
+  background-color: #3a7bd5;
+}
+
+.toggleInput:checked + .toggle:before {
+  transform: translateX(24px);
+}
+
+.toggleText {
+  font-size: 15px;
+  color: #333;
 }
 
 .toggleActive {
@@ -267,16 +414,24 @@
 .buttonContainer {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: 16px;
+  margin-top: 24px;
 }
 
 .cancelButton {
-  padding: 0.625rem 1.25rem;
+  padding: 14px 24px;
   background: white;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  background: #f5f5f5;
 }
 
 .buttonIcon {
@@ -285,19 +440,29 @@
 
 
 .submitButton {
-  padding: 0.625rem 1.25rem;
-  background-color: #3b82f6;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
   color: white;
   border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
 }
 
 .submitButton:hover {
-  background-color: #2563eb;
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .submitButton:focus {
@@ -311,7 +476,41 @@
     grid-template-columns: 1fr;
   }
   
+  .formGroupFullWidth {
+    grid-column: span 1;
+  }
+  
+  .typeGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .conditionGroup {
+    flex-direction: column;
+  }
+  
+  .valueInput {
+    width: 100%;
+  }
+  
   .inputGroup {
     flex-direction: column;
+  }
+
+  .suggestions {
+    position: fixed;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    max-height: 60vh;
+    transform: translateY(-50%);
+    padding-top: 40px;
+  }
+  
+  .closeSuggestions {
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 22px;
   }
 }

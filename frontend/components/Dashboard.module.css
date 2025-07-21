@@ -1,3 +1,33 @@
+.dashboardWrapper {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.closeButton {
+  background: #fef2f2;
+  color: #ef4444;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.closeButton:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.1);
+}
+
 .dashboardGrid {
     display: grid;
     gap: 2rem;

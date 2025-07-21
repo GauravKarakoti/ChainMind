@@ -21,7 +21,7 @@ export default function AlertCard({ alert, onEdit, onDelete, onToggle }) {
     price: <DollarSign size={16} />,
     gas: <Zap size={16} />,
     whale: <Activity size={16} />,
-    activity: <div className={styles.activityIcon}>A</div>
+    activity: <div>A</div>
   };
 
   return (

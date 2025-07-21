@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Check, ChevronDown, Bell, Zap, Activity, DollarSign } from 'lucide-react';
+import { Check, ChevronDown, Bell, Zap, Activity, DollarSign } from 'lucide-react';
 import axios from 'axios';
 import styles from './AlertConfig.module.css';
 
@@ -8,6 +8,7 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [tokenSuggestions, setTokenSuggestions] = useState([]);
   const [loadingTokens, setLoadingTokens] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   
   const [alert, setAlert] = useState({
     id: initialData?.id || null,
@@ -44,6 +45,7 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
   const handleTokenChange = (e) => {
     const value = e.target.value;
     setAlert({...alert, token: value});
+    setShowSuggestions(true);
     
     if (value.length > 1) {
       const filtered = tokenSuggestions.filter(token => 
@@ -62,20 +64,26 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>
-          <Bell size={20} className={styles.icon} />
-          <span> Create Smart Alert</span>
-        </h2>
-        <button onClick={onCancel} className={styles.closeButton}>
-          <X size={20} />
-        </button>
+        <div className={styles.headerContent}>
+          <div className={styles.headerIcon}>
+            <Bell size={24} />
+          </div>
+          <div className={styles.headerText}>
+            <h2>Create Smart Alert</h2>
+            <p>Set up intelligent blockchain monitoring</p>
+          </div>
+        </div>
       </div>
+
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
+          {/* Alert Name */}
+          <div className={`${styles.formGroup} ${styles.formGroupFullWidth}`}>
             <label className={styles.label}>
-              Alert Name <span className={styles.required}>*</span>
-              <span className={styles.charCounter}>{alert.name.length}/30</span>
+              Alert Name
+              <span className={styles.charCounter}>
+                {alert.name.length}/30
+              </span>
             </label>
             <input
               type="text"
@@ -87,31 +95,43 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Alert Type <span className={styles.required}>*</span></label>
+          {/* Alert Type */}
+          <div className={`${styles.formGroup} ${styles.formGroupFullWidth}`}>
+            <label className={styles.label}>Alert Type</label>
             <div className={styles.typeGrid}>
               {[
-                {id: 'price', label: 'Price', icon: <DollarSign size={16} />},
-                {id: 'gas', label: 'Gas', icon: <Zap size={16} />},
-                {id: 'whale', label: 'Whale', icon: <Activity size={16} />},
-                {id: 'account-activity', label: 'Activity', icon: <div className={styles.iconPlaceholder}>A</div>}
+                {id: 'price', label: 'Price', icon: DollarSign},
+                {id: 'gas', label: 'Gas', icon: Zap},
+                {id: 'whale', label: 'Whale', icon: Activity},
+                {id: 'account-activity', label: 'Activity'}
               ].map((type) => (
                 <button
                   key={type.id}
                   type="button"
-                  className={`${styles.typeButton} ${alertType === type.id ? styles.typeActive : ''}`}
+                  className={`${styles.typeButton} ${alertType === type.id ? styles.typeButtonActive : ''}`}
                   onClick={() => {
                     setAlertType(type.id);
                     setAlert({...alert, type: type.id});
                   }}
                 >
-                  {type.icon}
-                  {type.label}
+                  {type.icon ? (
+                    <type.icon size={32} className={`${styles.typeIcon} ${alertType === type.id ? styles.typeIconActive : ''}`} />
+                  ) : (
+                    <svg width="40" height="40" viewBox="0 0 100 100">
+                    <text x="10" y="60" fontSize="60" fontFamily="Arial"  fill="black">
+                     A
+                    </text>
+                   </svg>
+                  )}
+                  <span className={`${styles.typeLabel} ${alertType === type.id ? styles.typeLabelActive : ''}`}>
+                    {type.label}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
           
+          {/* Blockchain */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Blockchain <span className={styles.required}>*</span></label>
             <div className={styles.selectContainer}>
@@ -126,10 +146,11 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 <option value="bitcoin/mainnet">Bitcoin</option>
                 <option value="dogecoin/mainnet">Dogecoin</option>
               </select>
-              <ChevronDown size={16} className={styles.selectIcon} />
+              <ChevronDown size={18} className={styles.selectIcon} />
             </div>
           </div>
           
+          {/* Token/Asset */}
           <div className={styles.formGroup}>
             <label className={styles.label}>
               {alertType === 'gas' ? 'Gas Metric' : 'Token/Asset'} 
@@ -140,21 +161,27 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 type="text"
                 value={alert.token}
                 onChange={handleTokenChange}
+                onFocus={() => setShowSuggestions(true)}
                 className={styles.input}
                 placeholder={alertType === 'gas' ? "Gas price" : "ETH, USDT, BTC..."}
                 required
               />
-              {loadingTokens ? (
+              {showSuggestions && !loadingTokens && tokenSuggestions.length > 0 && (
                 <div className={styles.suggestions}>
-                  <div className={styles.suggestionItem}>Loading tokens...</div>
-                </div>
-              ) : tokenSuggestions.length > 0 ? (
-                <div className={styles.suggestions}>
+                  <button 
+                    className={styles.closeSuggestions} 
+                    onClick={() => setShowSuggestions(false)}
+                  >
+                    &times;
+                  </button>
                   {tokenSuggestions.map(token => (
                     <div 
                       key={token.symbol}
                       className={styles.suggestionItem}
-                      onClick={() => setAlert({...alert, token: token.symbol})}
+                      onClick={() => {
+                        setAlert({...alert, token: token.symbol});
+                        setShowSuggestions(false); // Hide on selection
+                      }}
                     >
                       {token.logo && (
                         <img 
@@ -168,47 +195,57 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                     </div>
                   ))}
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
           
+          {/* Condition */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Condition <span className={styles.required}>*</span></label>
             <div className={styles.conditionGroup}>
-              <select
-                value={alert.condition}
-                onChange={(e) => setAlert({...alert, condition: e.target.value})}
-                className={styles.conditionSelect}
-              >
-                <option value="above">Above</option>
-                <option value="below">Below</option>
-                <option value="change">Changes by</option>
-                <option value="volatility">High Volatility</option>
-              </select>
-              <input
-                type="number"
-                value={alert.value}
-                onChange={(e) => setAlert({...alert, value: parseFloat(e.target.value) || 0})}
-                className={styles.valueInput}
-                placeholder="Value"
-                required
-              />
-              <span className={styles.unit}>
-                {alertType === 'gas' ? 'gwei' : alertType === 'whale' ? (alert.thresholdType === 'value' ? 'USD' : '%') : ''}
-              </span>
+              <div className={styles.selectContainer}>
+                <select
+                  value={alert.condition}
+                  onChange={(e) => setAlert({...alert, condition: e.target.value})}
+                  className={styles.conditionSelect}
+                >
+                  <option value="above">Above</option>
+                  <option value="below">Below</option>
+                  <option value="change">Changes by</option>
+                  <option value="volatility">High Volatility</option>
+                </select>
+                <ChevronDown size={16} className={styles.selectIcon} />
+              </div>
+              <div className={styles.valueGroup}>
+                <input
+                  type="number"
+                  value={alert.value}
+                  onChange={(e) => setAlert({...alert, value: parseFloat(e.target.value) || 0})}
+                  className={styles.valueInput}
+                  placeholder="Value"
+                  required
+                />
+                <span className={styles.unit}>
+                  {alertType === 'gas' ? 'gwei' : alertType === 'whale' ? (alert.thresholdType === 'value' ? 'USD' : '%') : ''}
+                </span>
+              </div>
             </div>
           </div>
-          
+
+          {/* Frequency */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Frequency</label>
-            <select
-              value={alert.frequency}
-              onChange={(e) => setAlert({...alert, frequency: e.target.value})}
-              className={styles.select}
-            >
-              <option value="once">Alert Once</option>
-              <option value="recurring">Recurring</option>
-            </select>
+            <div className={styles.selectContainer}>
+              <select
+                value={alert.frequency}
+                onChange={(e) => setAlert({...alert, frequency: e.target.value})}
+                className={styles.select}
+              >
+                <option value="once">Alert Once</option>
+                <option value="recurring">Recurring</option>
+              </select>
+              <ChevronDown size={18} className={styles.selectIcon} />
+            </div>
           </div>
 
           {alert.type === 'gas' && (
@@ -227,26 +264,32 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
             <>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Threshold Type</label>
-                <select
-                  value={alert.thresholdType}
-                  onChange={e => setAlert({...alert, thresholdType: e.target.value})}
-                  className={styles.select}
-                >
-                  <option value="value">USD Value</option>
-                  <option value="percentage">% Supply</option>
-                </select>
+                <div className={styles.selectContainer}>
+                  <select
+                    value={alert.thresholdType}
+                    onChange={e => setAlert({...alert, thresholdType: e.target.value})}
+                    className={styles.select}
+                  >
+                    <option value="value">USD Value</option>
+                    <option value="percentage">% Supply</option>
+                  </select>
+                  <ChevronDown size={18} className={styles.selectIcon} />
+                </div>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Threshold {alert.thresholdType === 'value' ? '($)' : '(%)'}</label>
+                <label className={styles.label}>
+                  Threshold {alert.thresholdType === 'value' ? '($)' : '(%)'}
+                </label>
                 <input
                   type="number"
                   value={alert.value}
                   onChange={e => setAlert({...alert, value: e.target.value})}
-                  className={styles.valueInput}
+                  className={styles.input}
                 />
               </div>
             </>
           )}
+        </div>
 
           {alertType === 'account-activity' && (
             <div className={styles.formGroup}>
@@ -306,16 +349,24 @@ export default function AlertConfig({ onSave, onCancel, initialData }) {
                 </label>
               </div>
             </div>
-          )}
-        </div>
+        )}
         
+        {/* Action Buttons */}
         <div className={styles.buttonContainer}>
-          <button type="button" onClick={onCancel} className={styles.cancelButton}>
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className={styles.cancelButton}
+          >
             Cancel
           </button>
-          <button type="submit" className={styles.submitButton}>
-            <Check size={16} className={styles.buttonIcon} />
-            {initialData ? 'Update Alert' : 'Create Alert'}
+          <button 
+            type="submit" 
+            disabled={!alert.name || !alert.token}
+            className={styles.submitButton}
+          >
+            <Check size={18} />
+            Create Alert
           </button>
         </div>
       </form>

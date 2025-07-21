@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Pie, Doughnut, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, BarElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend } from 'chart.js';
-import { ExternalLinkIcon } from 'lucide-react';
+import { ExternalLinkIcon, X } from 'lucide-react';
 
 // Register required Chart.js components
 ChartJS.register(
@@ -18,10 +19,13 @@ ChartJS.register(
 import styles from './Dashboard.module.css';
 import { useMemo } from 'react';
 
-export default function Dashboard({ data }) {
+export default function Dashboard({ data, onClose }) {
+  const [isVisible, setIsVisible] = useState(true);
+
   console.log('Dashboard data:', data);
   const { api, chain, normalizedData } = data;
-  let transfers={} , dailyStats={} , tokenPrices={} , nftMetadata={}
+  let transfers = {}, dailyStats = {}, tokenPrices = {}, nftMetadata = {};
+
   const chartData = useMemo(() => {
     if (!normalizedData) return null;
     
@@ -37,7 +41,7 @@ export default function Dashboard({ data }) {
     }
   }, [normalizedData]);
 
-  console.log(chartData)
+  console.log(chartData);
 
   const chainNames = {
     'ethereum/mainnet': 'Ethereum',
@@ -75,22 +79,39 @@ export default function Dashboard({ data }) {
       console.error('Unknown API:', data.api);
   }
 
+  const handleClose = () => {
+    setIsVisible(false);
+    if (onClose) onClose(); // Call parent's close handler if provided
+  };
+
+  if (!isVisible) return null;
+
   return (
-    <div>
+    <div className={styles.dashboardWrapper}>
       <div className={styles.header}>
-        <div className={styles.chainBadge}>
-          {chainNames[data.chain] || data.chain.split('/')[0]}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className={styles.chainBadge}>
+            {chainNames[data.chain] || data.chain.split('/')[0]}
+          </div>
+          <div className={styles.apiBadge}>
+            {apiNames[data.api] || data.api}
+          </div>
         </div>
-        <div className={styles.apiBadge}>
-          {apiNames[data.api] || data.api}
-        </div>
+        <button 
+          onClick={handleClose}
+          className={styles.closeButton}
+          aria-label="Close dashboard"
+        >
+          <X size={18} />
+        </button>
       </div>
+      
       <div className={styles.dashboardGrid}>
         {normalizedData?.type === 'transfers' && normalizedData.items.length > 0 && (
           <div className={styles.chartCard}>
             <h2>Token Distribution</h2>
             <div className={styles.chartContainer}>
-              <Pie data={chartData} options={{ responsive: true, maintainAspectRatio: false , plugins: {legend: {position: 'top'}} }} />
+              <Pie data={chartData} options={{ responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'top'}} }} />
             </div>
           </div>
         )}
