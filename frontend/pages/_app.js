@@ -1,4 +1,3 @@
-// pages/_app.js
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`

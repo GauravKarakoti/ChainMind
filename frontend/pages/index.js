@@ -4,10 +4,12 @@ import styled from 'styled-components';
 import Dashboard from '../components/Dashboard';
 import AlertConfig from '../components/AlertConfig';
 import axios from 'axios';
-import { HelpCircle, Bell, X, Search, Zap, Activity } from 'lucide-react';
+import { HelpCircle, Bell, X, Search, Zap, Activity, LayoutGrid } from 'lucide-react';
 import GeneralResponse from '../components/GeneralResponse';
 import AlertCard from '../components/AlertCard';
 import LogoutButton from '../components/LogoutButton';
+import WorkflowBuilder from '../components/WorkflowBuilder';
+import styles from '../components/Dashboard.module.css';
 
 const EXAMPLE_QUERIES = [
   "Show my token transfers on 0x...",
@@ -427,9 +429,17 @@ const LoadingIndicator = styled.div`
   color: #64748b;
 `;
 
+const ResultsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+`;
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState(null);
+  const [workflowResults, setWorkflowResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showExamples, setShowExamples] = useState(false);
@@ -438,6 +448,8 @@ export default function Home() {
   const [editingAlert, setEditingAlert] = useState(null);
   const [user, setUser] = useState(null);
   const [isClient, setIsClient] = useState(false);
+  const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
+  const [savedWorkflows, setSavedWorkflows] = useState([]);
   const router = useRouter();
 
   const handleEditAlert = (alert) => {
@@ -452,6 +464,8 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
+      setResponse(null);
+      setWorkflowResults([]);
       const res = await axios.post('/api/ask', { query }, {
         headers: { 'x-auth-token': token }
       });
@@ -461,6 +475,81 @@ export default function Home() {
       console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const executeWorkflow = async (workflow) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setResponse(null); // Clear single response
+      setWorkflowResults([]); // Clear previous results
+
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post('/api/execute-workflow', 
+        { workflow },
+        { headers: { 'x-auth-token': token } }
+      );
+      
+      // The backend returns an array of result objects
+      setWorkflowResults(response.data);
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      setError('Workflow execution failed: ' + errorMessage);
+      console.error('Workflow execution error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserWorkflows = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const response = await axios.get('/api/execute-workflow', {
+        headers: { 'x-auth-token': token }
+      });
+      setSavedWorkflows(response.data);
+    } catch (err) {
+      console.error('Failed to fetch workflows:', err);
+    }
+  };
+
+  const handleSaveWorkflow = async (workflowSteps) => {
+    const token = localStorage.getItem('token');
+    // Prompt for a workflow name
+    const name = prompt("Enter a name for this workflow:", `Workflow ${savedWorkflows.length + 1}`);
+    if (!name) return; // User cancelled
+
+    const newWorkflow = { name, steps: workflowSteps };
+
+    try {
+      const response = await axios.post('/api/execute-workflow', newWorkflow, {
+        headers: { 'x-auth-token': token }
+      });
+      setSavedWorkflows(prev => [response.data, ...prev]);
+      alert('Workflow saved successfully!');
+    } catch (err) {
+      console.error('Failed to save workflow:', err);
+      alert(`Error: ${err.response?.data?.error || 'Could not save workflow.'}`);
+    }
+  };
+
+  const handleDeleteWorkflow = async (workflowId) => {
+    if (!confirm('Are you sure you want to delete this workflow?')) {
+        return;
+    }
+    const token = localStorage.getItem('token');
+    try {
+        await axios.delete(`/api/execute-workflow?workflowId=${workflowId}`, {
+            headers: { 'x-auth-token': token }
+        });
+        setSavedWorkflows(prev => prev.filter(wf => wf.id !== workflowId));
+    } catch (err) {
+        console.error('Failed to delete workflow:', err);
+        alert(`Error: ${err.response?.data?.error || 'Could not delete workflow.'}`);
     }
   };
 
@@ -534,9 +623,13 @@ export default function Home() {
     }
   };
 
-  const handleCloseDashboard = () => {
+  const handleCloseSingleDashboard = () => {
     setResponse(null);
-    setQuery(''); // Clear the search input
+    setQuery('');
+  };
+
+  const handleCloseWorkflowDashboard = (indexToClose) => {
+    setWorkflowResults(prev => prev.filter((_, index) => index !== indexToClose));
   };
 
   useEffect(() => {
@@ -550,6 +643,7 @@ export default function Home() {
     if (storedUser && token) {
       setUser(JSON.parse(storedUser));
       fetchUserAlerts();
+      fetchUserWorkflows();
     } else {
       console.warn('No user found, redirecting to register');
       router.push('/register');
@@ -588,6 +682,13 @@ export default function Home() {
             <HeaderButton onClick={() => setShowExamples(!showExamples)}>
               <HelpCircle size={16} />
               Examples
+            </HeaderButton>
+            <HeaderButton 
+              onClick={() => setShowWorkflowBuilder(true)}
+              primary={showWorkflowBuilder}
+            >
+              <LayoutGrid size={16} />
+              Workflows
             </HeaderButton>
             <LogoutButton />
           </HeaderButtonGroup>
@@ -701,6 +802,53 @@ export default function Home() {
           </Panel>
         )}
 
+        {showWorkflowBuilder && (
+          <Panel>
+            <PanelHeader>
+              <PanelTitle>
+                <LayoutGrid size={20} />
+                Workflow Builder
+              </PanelTitle>
+              <CloseButton onClick={() => setShowWorkflowBuilder(false)}>
+                <X size={16} />
+              </CloseButton>
+            </PanelHeader>
+            
+            <WorkflowBuilder 
+              onSave={handleSaveWorkflow} 
+            />
+            
+            {savedWorkflows.length > 0 && (
+              <div className={styles.savedWorkflows}>
+                <h3 className={styles.sectionTitle}>Saved Workflows</h3>
+                <div className={styles.workflowGrid}>
+                  {savedWorkflows.map(workflow => (
+                    <div key={workflow.id} className={styles.workflowCard}>
+                      <div className={styles.workflowCardHeader}>
+                          <h4>{workflow.name}</h4>
+                            <button
+                                className={styles.deleteWorkflowButton}
+                                onClick={() => handleDeleteWorkflow(workflow.id)}
+                                title="Delete Workflow"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                      <p>{workflow.steps.length} steps</p>
+                      <button 
+                        className={styles.runButton}
+                        onClick={() => executeWorkflow(workflow)}
+                      >
+                        Run Workflow
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Panel>
+        )}
+
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
         {response?.error && (
@@ -730,9 +878,30 @@ export default function Home() {
         {response && response.type !== 'general' && (
           <Dashboard 
             data={response} 
-            onClose={handleCloseDashboard}
+            onClose={handleCloseSingleDashboard}
           />
         )}
+
+        <ResultsContainer>
+          {workflowResults.map((result, index) => {
+            if (result.success) {
+              return (
+                <Dashboard
+                  key={index}
+                  data={result}
+                  onClose={() => handleCloseWorkflowDashboard(index)}
+                />
+              );
+            } else {
+              return (
+                <ErrorCard key={index}>
+                  <ErrorTitle>{result.error}</ErrorTitle>
+                  <ErrorDetail>{result.details}</ErrorDetail>
+                </ErrorCard>
+              );
+            }
+          })}
+        </ResultsContainer>
       </Container>
     </PageWrapper>
   );

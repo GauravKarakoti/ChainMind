@@ -4,6 +4,7 @@ const axios = require('axios');
 const { getApiCache, setApiCache } = require('../utils/db');
 const { executeEthContract, executeTronContract, executeXrplContract } = require('./contract.js')
 const { resolveTokenAddress } = require("./resolve.js")
+const auth = require('../middleware/auth');
 
 // Unified blockchain API handler
 router.post('/nodit-api', async (req, res) => {
@@ -153,6 +154,40 @@ router.post('/nodit-api', async (req, res) => {
     };
    
     res.status(errorResponse.statusCode).json(errorResponse);
+  }
+});
+
+router.post('/execute-multisig', auth, async (req, res) => {
+  const { txData, signatures, contractAddress, chain } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Get user from DB
+    const user = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
+    
+    // Verify signatures
+    const signers = verifySignatures(txData, signatures);
+    
+    // Check if signers meet threshold
+    const threshold = await getThreshold(contractAddress, chain);
+    if (signers.length < threshold) {
+      return res.status(400).json({ error: 'Insufficient signatures' });
+    }
+    
+    // Submit to blockchain
+    let result;
+    switch(chain) {
+      case 'ethereum/mainnet':
+        result = await executeEthMultisig(contractAddress, txData, signatures);
+        break;
+      // Add other chains
+      default:
+        return res.status(400).json({ error: 'Unsupported chain for multi-sig' });
+    }
+    
+    res.json({ success: true, txHash: result.txHash });
+  } catch (error) {
+    res.status(500).json({ error: 'Multi-sig execution failed', details: error.message });
   }
 });
 

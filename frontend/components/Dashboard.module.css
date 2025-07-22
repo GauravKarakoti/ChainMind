@@ -137,4 +137,49 @@
     margin: 0.25rem 0;
     color: #4b5563;
 }
-  
+
+.savedWorkflows {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #1e40af;
+}
+
+.workflowGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.workflowCard {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.workflowCard h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.workflowCard p {
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.runButton {
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}

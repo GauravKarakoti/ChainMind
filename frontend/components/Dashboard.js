@@ -79,6 +79,32 @@ export default function Dashboard({ data, onClose }) {
       console.error('Unknown API:', data.api);
   }
 
+  const SafelyParsedAttributes = ({ rawMetadata }) => {
+    let attributes = [];
+    try {
+      // Attempt to parse the raw metadata string
+      attributes = JSON.parse(rawMetadata)?.attributes || [];
+      if (!Array.isArray(attributes)) attributes = [];
+    } catch (e) {
+      // If parsing fails, attributes remain an empty array, preventing a crash
+      console.error("Could not parse NFT metadata attributes:", e);
+    }
+
+    if (attributes.length === 0) {
+      return <p className="text-sm text-gray-500">No attributes found.</p>;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {attributes.map((attr, i) => (
+          <div key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+            <span className="font-medium">{attr.trait_type || 'Trait'}:</span> {String(attr.value)}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const handleClose = () => {
     setIsVisible(false);
     if (onClose) onClose(); // Call parent's close handler if provided
@@ -179,13 +205,7 @@ export default function Dashboard({ data, onClose }) {
                 
                 <div className="mt-4">
                   <h4 className="font-medium mb-2">Attributes</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {JSON.parse(nft.rawMetadata).attributes.map((attr, i) => (
-                      <div key={i} className="px-3 py-1 bg-gray-100 rounded-full">
-                        <span className="font-medium">{attr.trait_type}:</span> {attr.value}
-                      </div>
-                    ))}
-                  </div>
+                  <SafelyParsedAttributes rawMetadata={nft.rawMetadata} />
                 </div>
               </div>
             ))}

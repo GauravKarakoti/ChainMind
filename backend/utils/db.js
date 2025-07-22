@@ -92,6 +92,20 @@ function initializeDatabase() {
     });
 
     db.run(`
+      CREATE TABLE IF NOT EXISTS workflows (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        steps TEXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
+      )
+    `, (err) => {
+      if (err) console.error('Error creating workflows table:', err.message);
+      else console.log('Workflows table initialized');
+    });
+
+    db.run(`
       CREATE TABLE IF NOT EXISTS alerts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,

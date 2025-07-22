@@ -33,6 +33,9 @@ app.use('/api/alerts', alertRouter);
 const tokensRouter = require('./routes/tokens');
 app.use('/api/tokens', tokensRouter);
 
+const workflowRouter = require('./routes/workflows');
+app.use('/api/workflows', workflowRouter);
+
 app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`);
 });
