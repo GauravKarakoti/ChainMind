@@ -25,6 +25,7 @@ const PageWrapper = styled.div`
   position: relative;
   overflow-x: hidden;
   
+  
   &::before {
     content: '';
     position: absolute;
@@ -37,6 +38,7 @@ const PageWrapper = styled.div`
       radial-gradient(circle at 80% 20%, rgba(147, 197, 253, 0.08) 0%, transparent 50%),
       radial-gradient(circle at 40% 40%, rgba(219, 234, 254, 0.1) 0%, transparent 50%);
     pointer-events: none;
+     
   }
 `;
 
