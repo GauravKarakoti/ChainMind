@@ -172,10 +172,19 @@ router.patch('/:id/toggle', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   const { id } = req.params;
   const updateData = req.body.updateData;
   console.log('Update data:', updateData);
+
+  const user = await new Promise((resolve, reject) => {
+    db.get('SELECT * FROM users WHERE id = ?', [req.user.id], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+
+  const chatID = user.telegram_chat_id;
   
   try {
     const stmt = db.prepare(`
@@ -194,7 +203,7 @@ router.put('/:id', async (req, res) => {
         updateData.chain,
         updateData.token,
         updateData.accountAddress,
-        updateData.chatID,
+        chatID,
         updateData.condition,
         updateData.value,
         updateData.frequency,
