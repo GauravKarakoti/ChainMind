@@ -1,239 +1,294 @@
 .alertCard {
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid #eaeaea;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 
+    0 10px 25px rgba(59, 130, 246, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: hidden;
 }
 
 .alertCard.active {
-  border-left: 4px solid #4CAF50;
+  border-color: #10b981; /* emerald-500 */
+  background: linear-gradient(145deg, #ffffff 0%, #ecfdf5 100%); /* light green bg */
+  box-shadow: 
+    0 15px 35px rgba(16, 185, 129, 0.15),  /* green glow */
+    0 8px 20px rgba(16, 185, 129, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
 }
 
+.alertCard.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7, #10b981); /* green shimmer */
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 200% 0; }
+  50% { background-position: -200% 0; }
+}
+
+
 .alertCard.inactive {
-  border-left: 4px solid #9E9E9E;
+  border-color: #e2e8f0;
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
   opacity: 0.8;
 }
 
 .alertHeader {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #eee;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .alertIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  margin-right: 12px;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
 }
 
-.alertCard[data-type="price"] .alertIcon {
-  background: #E3F2FD;
-  color: #2196F3;
-}
-
-.alertCard[data-type="gas"] .alertIcon {
-  background: #FFF8E1;
-  color: #FFC107;
-}
-
-.alertCard[data-type="whale"] .alertIcon {
-  background: #F3E5F5;
-  color: #9C27B0;
-}
-
-.alertCard[data-type="activity"] .alertIcon {
-  background: #E8F5E9;
-  color: #4CAF50;
+.alertCard.inactive .alertIcon {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
 }
 
 .alertName {
-  flex: 1;
-  font-weight: 600;
-  font-size: 16px;
-  color: #333;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.alertCard.inactive .alertName {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .alertActions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .editButton {
-  background: none;
-  border: 1px solid #ddd;
-  color: #666;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 13px;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .editButton:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .deleteButton {
-  background: none;
-  border: none;
-  color: #F44336;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  padding: 0.5rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
 }
 
 .deleteButton:hover {
-  background: rgba(244, 67, 54, 0.1);
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.15);
 }
 
 .alertDetails {
-  padding: 16px 20px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.alertCard.active .alertDetails {
+  background: linear-gradient(145deg, rgba(240, 247, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
+  border-color: rgba(59, 130, 246, 0.1);
 }
 
 .detailItem {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.detailItem:last-child {
+  margin-bottom: 0;
 }
 
 .detailLabel {
-  font-size: 12px;
-  color: #777;
-  margin-bottom: 4px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .detailValue {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  font-size: 0.9rem;
+  color: #1e293b;
+  font-weight: 700;
+  text-align: right;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.channelBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.channelBadge {
-  padding: 4px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.channelBadge[data-channel="telegram"] {
-  background: #E3F2FD;
-  color: #2196F3;
-}
-
-.channelBadge[data-channel="email"] {
-  background: #FFECB3;
-  color: #FF9800;
-}
-
-.channelBadge[data-channel="push"] {
-  background: #C8E6C9;
-  color: #4CAF50;
-}
-
-.channelBadge[data-channel="sms"] {
-  background: #F5E6FF;
-  color: #9C27B0;
+.alertCard.inactive .detailValue {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .alertFooter {
-  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fafafa;
-  border-top: 1px solid #eee;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  gap: 1rem;
+}
+
+.alertCard.active .alertFooter {
+  border-top-color: rgba(59, 130, 246, 0.2);
 }
 
 .toggleContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.toggleContainer:hover {
+  background: linear-gradient(145deg, rgba(241, 245, 249, 0.9) 0%, rgba(226, 232, 240, 0.7) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.alertCard.active .toggleContainer {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.alertCard.active .toggleContainer:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 .toggleLabel {
-  font-size: 13px;
-  color: #666;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.alertCard.active .toggleLabel {
+  color: white;
+}
+
+.alertCard.inactive .toggleLabel {
+  color: #64748b;
 }
 
 .lastTriggered {
-  font-size: 12px;
-  color: #9E9E9E;
-  font-style: italic;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+  text-align: right;
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
-/* Status indicator */
-.statusIndicator {
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 24px 24px 0;
-  border-color: transparent #4CAF50 transparent transparent;
+.alertCard.active .lastTriggered {
+  background: linear-gradient(145deg, rgba(240, 247, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
+  border-color: rgba(59, 130, 246, 0.1);
+  color: #475569;
 }
 
-.alertCard.active .statusIndicator {
-  border-color: transparent #4CAF50 transparent transparent;
-}
-
-.alertCard.inactive .statusIndicator {
-  border-color: transparent #9E9E9E transparent transparent;
-}
-
-/* Hover effects */
-.alertCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .alertDetails {
-    grid-template-columns: 1fr;
+/* Responsive design */
+@media (max-width: 640px) {
+  .alertHeader {
+    gap: 0.75rem;
+  }
+  
+  .alertName {
+    font-size: 1rem;
+  }
+  
+  .detailItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .detailValue {
+    text-align: left;
   }
   
   .alertFooter {
     flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  
+  .lastTriggered {
+    text-align: center;
   }
 }
