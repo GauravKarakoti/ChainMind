@@ -9,7 +9,9 @@ router.post('/execute', auth, async (req, res) => {
   try {
     const { workflow } = req.body;
     const results = await processWorkflow(workflow);
-    console.log('Workflow execution results:', results);
+    results.map(result => {if (result.api==='getTokenPricesByContracts' || result.api==='getNftMetadataByTokenIds') {
+        console.log(result.data);
+    }});
     res.json(results);
   } catch (error) {
     console.error('Workflow execution error:', error);

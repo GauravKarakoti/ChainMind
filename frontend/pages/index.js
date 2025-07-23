@@ -881,6 +881,7 @@ export default function Home() {
         <ResultsContainer>
           {workflowResults.map((result, index) => {
             if (result.success) {
+              console.log("Success Result:",result)
               return (
                 <Dashboard
                   key={index}

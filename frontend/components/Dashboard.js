@@ -70,10 +70,12 @@ export default function Dashboard({ data, onClose }) {
       break;
     case 'getTokenPricesByContracts':
       // Doughnut chart for token price metrics (e.g., percentChange7d, percentChange24h, percentChange1h)
-      tokenPrices = data.tokenPrices;
+      tokenPrices = data.tokenPrices || data.data;
+      console.log(tokenPrices);
       break;
     case 'getNftMetadataByTokenIds':
       nftMetadata = data.data;
+      console.log('NFT Metadata:', data.data);
       break;
     default:
       console.error('Unknown API:', data.api);
@@ -161,7 +163,7 @@ export default function Dashboard({ data, onClose }) {
           </div>
         )}
 
-        {normalizedData?.type === 'nft' && normalizedData.items.length > 0 && (
+        {normalizedData?.type === 'nft' && (
           <div className={styles.chartCard}>
             <h2 className={styles.chartTitle}>NFT Details</h2>
             {nftMetadata.map(nft => (
