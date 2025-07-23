@@ -1,46 +1,34 @@
 import axios from 'axios';
 
 export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+
   const backendBaseUrl = process.env.URL;
   const token = req.headers['x-auth-token'];
-  const { method } = req;
-  const { workflowId } = req.query;
+  const { workflow } = req.body;
 
   if (!token) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
+  if (!workflow) {
+    return res.status(400).json({ error: 'Invalid workflow structure provided for execution' });
+  }
+
   try {
-    switch (method) {
-      case 'GET':
-        const getResponse = await axios.get(`${backendBaseUrl}/api/workflows`, {
-          headers: { 'x-auth-token': token }
-        });
-        return res.status(200).json(getResponse.data);
-
-      case 'POST':
-        const createResponse = await axios.post(`${backendBaseUrl}/api/workflows`, req.body, {
-          headers: { 'x-auth-token': token }
-        });
-        return res.status(201).json(createResponse.data);
-
-      case 'DELETE':
-        if (!workflowId) {
-          return res.status(400).json({ error: 'Workflow ID is required' });
-        }
-        await axios.delete(`${backendBaseUrl}/api/workflows/${workflowId}`, {
-          headers: { 'x-auth-token': token }
-        });
-        return res.status(204).end();
-
-      default:
-        res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
-        return res.status(405).end(`Method ${method} Not Allowed`);
-    }
+    const response = await axios.post(
+      `${backendBaseUrl}/api/workflows/execute`,
+      { workflow }, // Ensure the body is correctly structured for the execution endpoint
+      { headers: { 'x-auth-token': token } }
+    );
+    return res.status(response.status).json(response.data);
   } catch (error) {
-    console.error('Workflow API proxy error:', error.response?.data || error.message);
+    console.error('Workflow execution proxy error:', error.response?.data || error.message);
     const status = error.response?.status || 500;
-    const data = error.response?.data || { error: 'Failed to process workflow request' };
+    const data = error.response?.data || { error: 'Failed to execute workflow' };
     return res.status(status).json(data);
   }
 }

@@ -479,26 +479,20 @@ export default function Home() {
   };
 
   const executeWorkflow = async (workflow) => {
+    // This function is already correct and does not need changes.
     try {
       setLoading(true);
       setError(null);
-      setResponse(null); // Clear single response
-      setWorkflowResults([]); // Clear previous results
-
+      setResponse(null);
+      setWorkflowResults([]);
       const token = localStorage.getItem('token');
-      
-      const response = await axios.post('/api/execute-workflow', 
-        { workflow },
-        { headers: { 'x-auth-token': token } }
-      );
-      
-      // The backend returns an array of result objects
+      const response = await axios.post('/api/execute-workflow', { workflow }, {
+        headers: { 'x-auth-token': token }
+      });
       setWorkflowResults(response.data);
-
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message;
       setError('Workflow execution failed: ' + errorMessage);
-      console.error('Workflow execution error:', error);
     } finally {
       setLoading(false);
     }
@@ -508,7 +502,8 @@ export default function Home() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const response = await axios.get('/api/execute-workflow', {
+      // CORRECTED URL
+      const response = await axios.get('/api/workflows', {
         headers: { 'x-auth-token': token }
       });
       setSavedWorkflows(response.data);
@@ -519,14 +514,14 @@ export default function Home() {
 
   const handleSaveWorkflow = async (workflowSteps) => {
     const token = localStorage.getItem('token');
-    // Prompt for a workflow name
     const name = prompt("Enter a name for this workflow:", `Workflow ${savedWorkflows.length + 1}`);
-    if (!name) return; // User cancelled
+    if (!name) return;
 
     const newWorkflow = { name, steps: workflowSteps };
 
     try {
-      const response = await axios.post('/api/execute-workflow', newWorkflow, {
+      // CORRECTED URL
+      const response = await axios.post('/api/workflows', newWorkflow, {
         headers: { 'x-auth-token': token }
       });
       setSavedWorkflows(prev => [response.data, ...prev]);
@@ -543,7 +538,8 @@ export default function Home() {
     }
     const token = localStorage.getItem('token');
     try {
-        await axios.delete(`/api/execute-workflow?workflowId=${workflowId}`, {
+      // CORRECTED URL
+        await axios.delete(`/api/workflows?workflowId=${workflowId}`, {
             headers: { 'x-auth-token': token }
         });
         setSavedWorkflows(prev => prev.filter(wf => wf.id !== workflowId));
