@@ -1,119 +1,101 @@
 .workflowBuilder {
-  padding: 2rem;
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 1rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem;
+  background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 30px rgba(0, 119, 182, 0.08);
   margin-bottom: 2rem;
+  border: 1px solid rgba(191, 219, 254, 0.5);
 }
 
 .stepCreator {
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: #f1f5f9;
-  border-radius: 0.75rem;
-}
-
-.stepTypeSelector {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.stepType {
-  padding: 1.2rem;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  padding: 1.75rem;
+  background: rgba(224, 242, 254, 0.5);
+  border-radius: 1rem;
+  border: 1px dashed rgba(125, 211, 252, 0.5);
   text-align: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.stepType:hover {
-  transform: translateY(-3px);
-  border-color: #93c5fd;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.stepType.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
-}
-
-.stepIcon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.stepDetails {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
-}
-
-.stepDetails label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #334155;
-}
-
-.stepDetails select, 
-.stepDetails input {
-  width: 100%;
-  padding: 0.9rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-  background: white;
 }
 
 .addStepButton {
-  padding: 0.9rem 1.5rem;
-  background: #3b82f6;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .addStepButton:hover {
-  background: #2563eb;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.addStepButton:before {
+  content: "+";
+  font-size: 1.2rem;
 }
 
 .stepsContainer {
-  margin: 2rem 0;
+  margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .workflowStep {
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
+  border: 1px solid #e0f2fe;
+  border-radius: 1rem;
+  padding: 1.75rem;
   position: relative;
+  box-shadow: 0 4px 20px rgba(191, 219, 254, 0.15);
+  transition: all 0.3s ease;
+}
+
+.workflowStep:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(191, 219, 254, 0.25);
 }
 
 .stepHeader {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f9ff;
+}
+
+.stepIcon {
+  background: #e0f2fe;
+  color: #0ea5e9;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
 }
 
 .stepTitle {
   font-weight: 700;
-  margin-left: 0.75rem;
+  margin-left: 1rem;
   flex-grow: 1;
+  color: #0369a1;
+  font-size: 1.1rem;
 }
 
 .removeStep {
   background: #fee2e2;
-  color: #dc2626;
+  color: #ef4444;
   border: none;
   width: 32px;
   height: 32px;
@@ -122,35 +104,156 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeStep:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.1);
 }
 
 .stepForm {
-  padding: 1rem;
+  padding: 1.5rem;
   background: #f8fafc;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e0f2fe;
+}
+
+.stepForm label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #0c4a6e;
+  font-size: 0.95rem;
+}
+
+.stepForm select, 
+.stepForm input {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  background: white;
+  font-size: 1rem;
+  color: #1e3a8a;
+  transition: all 0.2s ease;
+}
+
+.stepForm select:focus, 
+.stepForm input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
 .saveWorkflow {
   width: 100%;
-  padding: 1.1rem;
+  padding: 1.25rem;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
   font-weight: 700;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.25);
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .saveWorkflow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
 }
 
 .saveWorkflow:disabled {
-  background: #94a3b8;
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .workflowBuilder {
+    padding: 1.5rem;
+  }
+  
+  .stepCreator {
+    padding: 1.25rem;
+  }
+  
+  .addStepButton {
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .workflowStep {
+    padding: 1.5rem;
+  }
+}
+
+/* Add these styles to your existing CSS */
+.stepForm {
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  border: 1px solid #e0f2fe;
+  overflow: hidden; /* Prevents content from overflowing */
+}
+
+.stepForm label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #0c4a6e;
+  font-size: 0.9rem;
+}
+
+.stepForm select, 
+.stepForm input {
+  width: 100%;
+  max-width: 100%; /* Ensures inputs don't overflow */
+  padding: 0.75rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  background: white;
+  font-size: 0.95rem;
+  box-sizing: border-box; /* Includes padding in width calculation */
+}
+
+/* For the select dropdowns specifically */
+.stepForm select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230ea5e9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+/* Adjust the step container */
+.workflowStep {
+  background: white;
+  border: 1px solid #e0f2fe;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(191, 219, 254, 0.15);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* For the API method display */
+.stepForm p {
+  margin: 0 0 1.25rem 0;
+  padding: 0.75rem;
+  background: #f0f9ff;
+  border-radius: 0.5rem;
+  border-left: 3px solid #0ea5e9;
+  color: #0369a1;
 }
